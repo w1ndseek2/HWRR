@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="target-densitydpi=320,width=640,user-scalable=no">
+    <title>Title</title>
+    <script src="static/js/jquery-3.3.1.min.js"></script>
+    <style type="text/css">
+        #canvas {
+            width: 400px;
+            height: 400px;
+            background-color: pink;
+            color: black;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+<p id="mess"></p>
+<canvas id="canvas">
+</canvas>
+</body>
+<script>
+    var data = {touchstart: {}, touchmove: [], touchend: {}};
+
+    function handle(ev) {
+        var canvas = $("#canvas");
+        var x = ev.touches[0].clientX - canvas.offset().left;
+        var y = ev.touches[0].clientY - canvas.offset().top;
+        showInfo(ev, [x, y]+"");
+        var t = (new Date().valueOf() + "").substring(6);
+        switch (ev.type) {
+            case "touchstart":
+            case "touchend": {
+                data[ev.type] = {x: x, y: y, time: t};
+                break;
+            }
+            case "touchmove": {
+                data["touchmove"].push({x: x, y: y, time: t});
+                break;
+            }
+        }
+        drawLine(ev, x, y);
+    }
+
+    function showInfo(ev, data) {
+        $("#mess").html(data);
+        console.log(data);
+        // console.log(ev);
+    }
+
+    function drawLine(ev, x, y) {
+        var cvs = document.getElementById("canvas");
+        var context = cvs.getContext("2d");
+        if (ev.type === "touchstart") {
+            context.moveTo(x, y);
+        } else if (ev.type === "touchmove") {
+            context.lineTo(x, y);
+        }
+        context.stroke();
+        console.log("ok");
+    }
+
+    document.addEventListener("touchstart", handle, false);
+    document.addEventListener("touchmove", handle, false);
+    document.addEventListener("touchend", handle, false);
+</script>
+</html>
