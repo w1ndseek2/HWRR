@@ -40,15 +40,14 @@
         }
         var t = (new Date().valueOf() + "").substring(6);
         switch (ev.type) {
-            case "touchstart":
-            case "touchend": {
-                data[ev.type] = {x: x.toFixed(2), y: y.toFixed(2), time: t};
+            case "touchstart": {
+                data[ev.type] = {x: x.toFixed(2), y: y.toFixed(2), t: t};
                 break;
             }
             case "touchmove": {
-                // ev.preventDefault();
+                ev.preventDefault();
                 ev.stopPropagation();
-                data["touchmove"].push({x: x.toFixed(2), y: y.toFixed(2), time: t});
+                data["touchmove"].push({x: x.toFixed(2), y: y.toFixed(2), t: t});
                 break;
             }
         }
