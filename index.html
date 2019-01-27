@@ -3,24 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="user-scalable=0">
-    <title>Title</title>
+    <title>HWR</title>
     <script src="static/js/jquery-3.3.1.min.js"></script>
     <style type="text/css">
         #canvas {
-            background-color: pink;
-            color: black;
             display: block;
         }
 
         body {
             margin: 0;
             padding: 0;
+            background-color: pink;
         }
     </style>
 </head>
 <body onload="init()">
 <canvas id="canvas">
 </canvas>
+<div style="text-align: center" id="button">
+    <a onclick="clear()">清空</a>
+    <a onclick="submit()">提交</a>
+</div>
 </body>
 <script>
     var data = {touchstart: {}, touchmove: [], touchend: {}};
@@ -33,13 +36,13 @@
         switch (ev.type) {
             case "touchstart":
             case "touchend": {
-                data[ev.type] = {x: x, y: y, time: t};
+                data[ev.type] = {x: x.toFixed(2), y: y.toFixed(2), time: t};
                 break;
             }
             case "touchmove": {
                 ev.preventDefault();
                 ev.stopPropagation();
-                data["touchmove"].push({x: x, y: y, time: t});
+                data["touchmove"].push({x: x.toFixed(2), y: y.toFixed(2), time: t});
                 break;
             }
         }
@@ -47,7 +50,6 @@
     }
 
     function drawLine(ev, x, y) {
-        console.log(x, y);
         var cvs = document.getElementById("canvas");
         var context = cvs.getContext("2d");
         if (ev.type === "touchstart") {
@@ -62,7 +64,37 @@
         document.body.style.height = window.innerHeight + "px";
         var cvs = document.getElementById("canvas");
         cvs.width = document.body.clientWidth;
-        cvs.height = document.body.clientHeight;
+        cvs.height = document.body.clientHeight * 0.9;
+    }
+
+    function clear() {
+        data = {touchstart: {}, touchmove: [], touchend: {}};
+        var cvs = document.getElementById("canvas");
+        var context = cvs.getContext("2d");
+        context.clearRect(0, 0, cvs.width, cvs.height);
+    }
+
+    function getPicture() {
+        var cvs = document.getElementById("canvas");
+        return cvs.toDataURL("image/png", 0.5);
+    }
+
+    function submit() {
+        data["img"] = getPicture();
+        $.ajax({
+            type: 'POST',
+            url: '/api/submit',
+            data: JSON.stringify(data),
+            dataType: 'json',
+            contentType: 'application/json',
+            complete: function (a) {
+                if (a.status === 200) {
+                    window.location.href = "success.html";
+                } else {
+                    window.location.href = "error.html";
+                }
+            }
+        })
     }
 
     document.addEventListener("touchstart", handler, false);
