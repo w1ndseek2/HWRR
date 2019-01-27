@@ -20,8 +20,8 @@
 <body onload="init()">
 <canvas id="canvas">
 </canvas>
-<div style="text-align: center" id="button">
-    <a onclick="clear()">清空</a>
+<div style="text-align: center; font-size: xx-large" id="button">
+    <a onclick="clean()">清空</a>
     <a onclick="submit()">提交</a>
 </div>
 </body>
@@ -30,8 +30,14 @@
 
     function handler(ev) {
         var canvas = $("#canvas");
-        var x = ev.touches[0].clientX - canvas.offset().left;
-        var y = ev.touches[0].clientY - canvas.offset().top;
+        var x, y;
+        if (ev.touches && ev.touches[0]) {
+            x = ev.touches[0].clientX - canvas.offset().left;
+            y = ev.touches[0].clientY - canvas.offset().top;
+        } else {
+            x = ev.clientX - canvas.offset().left;
+            y = ev.clientY - canvas.offset().top;
+        }
         var t = (new Date().valueOf() + "").substring(6);
         switch (ev.type) {
             case "touchstart":
@@ -40,7 +46,7 @@
                 break;
             }
             case "touchmove": {
-                ev.preventDefault();
+                // ev.preventDefault();
                 ev.stopPropagation();
                 data["touchmove"].push({x: x.toFixed(2), y: y.toFixed(2), time: t});
                 break;
@@ -67,11 +73,10 @@
         cvs.height = document.body.clientHeight * 0.9;
     }
 
-    function clear() {
+    function clean() {
         data = {touchstart: {}, touchmove: [], touchend: {}};
         var cvs = document.getElementById("canvas");
-        var context = cvs.getContext("2d");
-        context.clearRect(0, 0, cvs.width, cvs.height);
+        cvs.height = 1 - 1 + cvs.height;
     }
 
     function getPicture() {
