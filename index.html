@@ -18,6 +18,7 @@
     </style>
 </head>
 <body onload="init()">
+<p style="text-align: center; margin-bottom: 0; font-size: xx-large" id="mess">还需要提交3次</p>
 <canvas id="canvas">
 </canvas>
 <div style="text-align: center; font-size: xx-large" id="button">
@@ -26,7 +27,9 @@
 </div>
 </body>
 <script>
-    var data = {touchstart: {}, touchmove: []};
+    var data = [];
+    var per = {touchstart: {}, touchmove: []};
+    var globalCnt = 0;
 
     function handler(ev) {
         var canvas = $("#canvas");
@@ -41,13 +44,13 @@
         var t = (new Date().valueOf() + "").substring(6);
         switch (ev.type) {
             case "touchstart": {
-                data["touchstart"] = {x: x.toFixed(2), y: y.toFixed(2), t: t};
+                per["touchstart"] = {x: x.toFixed(2), y: y.toFixed(2), t: t};
                 break;
             }
             case "touchmove": {
                 ev.preventDefault();
                 ev.stopPropagation();
-                data["touchmove"].push({x: x.toFixed(2), y: y.toFixed(2), t: t});
+                per["touchmove"].push({x: x.toFixed(2), y: y.toFixed(2), t: t});
                 break;
             }
         }
@@ -69,11 +72,11 @@
         document.body.style.height = window.innerHeight + "px";
         var cvs = document.getElementById("canvas");
         cvs.width = document.body.clientWidth;
-        cvs.height = document.body.clientHeight * 0.9;
+        cvs.height = document.body.clientHeight * 0.8;
     }
 
     function clean() {
-        data = {touchstart: {}, touchmove: []};
+        per = {touchstart: {}, touchmove: []};
         var cvs = document.getElementById("canvas");
         cvs.height = 1 - 1 + cvs.height;
     }
@@ -84,21 +87,28 @@
     }
 
     function submit() {
-        data["img"] = getPicture();
-        $.ajax({
-            type: 'POST',
-            url: '/api/submit',
-            data: JSON.stringify(data),
-            dataType: 'json',
-            contentType: 'application/json',
-            complete: function (a) {
-                if (a.status === 200) {
-                    window.location.href = "success.html";
-                } else {
-                    window.location.href = "error.html";
+        per["img"] = getPicture();
+        globalCnt += 1;
+        if (globalCnt < 3) {
+            data.push(per);
+            clean();
+            $("#mess").html("还需要提交" + 3 - globalCnt + "次")
+        } else if (globalCnt === 3) {
+            $.ajax({
+                type: 'POST',
+                url: '/api/submit',
+                data: JSON.stringify(data),
+                dataType: 'json',
+                contentType: 'application/json',
+                complete: function (a) {
+                    if (a.status === 200) {
+                        window.location.href = "success.html";
+                    } else {
+                        window.location.href = "error.html";
+                    }
                 }
-            }
-        })
+            })
+        }
     }
 
     document.addEventListener("touchstart", handler, false);
