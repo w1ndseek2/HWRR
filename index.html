@@ -18,7 +18,7 @@
     </style>
 </head>
 <body onload="init()">
-<p style="text-align: center; margin-bottom: 0; font-size: xx-large" id="mess">还需要提交3次</p>
+<p style="text-align: center; margin: 0; font-size: xx-large" id="mess">还需要提交3次</p>
 <canvas id="canvas">
 </canvas>
 <div style="text-align: center; font-size: xx-large" id="button">
@@ -72,7 +72,7 @@
         document.body.style.height = window.innerHeight + "px";
         var cvs = document.getElementById("canvas");
         cvs.width = document.body.clientWidth;
-        cvs.height = document.body.clientHeight * 0.8;
+        cvs.height = document.body.clientHeight * 0.9;
     }
 
     function clean() {
@@ -92,7 +92,8 @@
         if (globalCnt < 3) {
             data.push(per);
             clean();
-            $("#mess").html("还需要提交" + 3 - globalCnt + "次")
+            var re = 3 - globalCnt;
+            $("#mess").html("还需要提交" + re + "次")
         } else if (globalCnt === 3) {
             $.ajax({
                 type: 'POST',
