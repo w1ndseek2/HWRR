@@ -2,33 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="target-densitydpi=320,width=640,user-scalable=no">
+    <meta name="viewport" content="user-scalable=0">
     <title>Title</title>
     <script src="static/js/jquery-3.3.1.min.js"></script>
     <style type="text/css">
         #canvas {
-            width: 400px;
-            height: 400px;
             background-color: pink;
             color: black;
             display: block;
         }
+
+        body {
+            margin: 0;
+            padding: 0;
+        }
     </style>
 </head>
-
-<body>
-<p id="mess"></p>
+<body onload="init()">
 <canvas id="canvas">
 </canvas>
 </body>
 <script>
     var data = {touchstart: {}, touchmove: [], touchend: {}};
 
-    function handle(ev) {
+    function handler(ev) {
         var canvas = $("#canvas");
         var x = ev.touches[0].clientX - canvas.offset().left;
         var y = ev.touches[0].clientY - canvas.offset().top;
-        showInfo(ev, [x, y]+"");
         var t = (new Date().valueOf() + "").substring(6);
         switch (ev.type) {
             case "touchstart":
@@ -37,6 +37,8 @@
                 break;
             }
             case "touchmove": {
+                ev.preventDefault();
+                ev.stopPropagation();
                 data["touchmove"].push({x: x, y: y, time: t});
                 break;
             }
@@ -44,13 +46,8 @@
         drawLine(ev, x, y);
     }
 
-    function showInfo(ev, data) {
-        $("#mess").html(data);
-        console.log(data);
-        // console.log(ev);
-    }
-
     function drawLine(ev, x, y) {
+        console.log(x, y);
         var cvs = document.getElementById("canvas");
         var context = cvs.getContext("2d");
         if (ev.type === "touchstart") {
@@ -59,11 +56,17 @@
             context.lineTo(x, y);
         }
         context.stroke();
-        console.log("ok");
     }
 
-    document.addEventListener("touchstart", handle, false);
-    document.addEventListener("touchmove", handle, false);
-    document.addEventListener("touchend", handle, false);
+    function init() {
+        document.body.style.height = window.innerHeight + "px";
+        var cvs = document.getElementById("canvas");
+        cvs.width = document.body.clientWidth;
+        cvs.height = document.body.clientHeight;
+    }
+
+    document.addEventListener("touchstart", handler, false);
+    document.addEventListener("touchmove", handler, false);
+    document.addEventListener("touchend", handler, false);
 </script>
 </html>
