@@ -26,7 +26,7 @@
 </div>
 </body>
 <script>
-    var data = {touchstart: {}, touchmove: [], touchend: {}};
+    var data = {touchstart: {}, touchmove: []};
 
     function handler(ev) {
         var canvas = $("#canvas");
@@ -41,7 +41,7 @@
         var t = (new Date().valueOf() + "").substring(6);
         switch (ev.type) {
             case "touchstart": {
-                data[ev.type] = {x: x.toFixed(2), y: y.toFixed(2), t: t};
+                data["touchstart"] = {x: x.toFixed(2), y: y.toFixed(2), t: t};
                 break;
             }
             case "touchmove": {
@@ -73,7 +73,7 @@
     }
 
     function clean() {
-        data = {touchstart: {}, touchmove: [], touchend: {}};
+        data = {touchstart: {}, touchmove: []};
         var cvs = document.getElementById("canvas");
         cvs.height = 1 - 1 + cvs.height;
     }
