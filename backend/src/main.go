@@ -48,9 +48,9 @@ func HandleData(d *PostDataEx) {
 	for _, v := range *d {
 		wg.Add(1)
 		go func(data PostData) {
-			move, _ := json.Marshal(v.TouchMove)
+			move, _ := json.Marshal(data.TouchMove)
 			newData := Data{
-				Img:  v.Img,
+				Img:  data.Img,
 				Move: string(move),
 			}
 			lock.Lock()
