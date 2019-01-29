@@ -88,10 +88,10 @@
 
     function submit() {
         per["img"] = getPicture();
+        data.push(per);
+        clean();
         globalCnt += 1;
         if (globalCnt < 3) {
-            data.push(per);
-            clean();
             var re = 3 - globalCnt;
             $("#mess").html("还需要提交" + re + "次")
         } else if (globalCnt === 3) {
