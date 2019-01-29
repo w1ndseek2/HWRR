@@ -112,8 +112,18 @@
         }
     }
 
+    function fresh() {
+        var url = location.href;
+        var check = url.split("?");
+        if (check[1] != 1) {
+            url += "?1";
+            self.location.replace(url);
+        }
+    }
+
     document.addEventListener("touchstart", handler, false);
     document.addEventListener("touchmove", handler, false);
     document.addEventListener("touchend", handler, false);
+    fresh();
 </script>
 </html>
