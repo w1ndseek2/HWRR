@@ -115,7 +115,7 @@
     function fresh() {
         var url = location.href;
         var check = url.split("?");
-        if (check[1] != 1) {
+        if (check[check.length - 1] != 1) {
             url += "?1";
             self.location.replace(url);
         }
