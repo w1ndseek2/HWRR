@@ -98,7 +98,7 @@ func (d *Datas) DataGenerate(f *os.File) {
 				t        bytes.Buffer
 				baseTime int
 			)
-			err := json.Unmarshal([]byte(v.Move), &points)
+			err := json.Unmarshal([]byte(data.Move), &points)
 			if err != nil {
 				panic(err)
 			}
