@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<h3>
+    welcome!
+</h3>
+<div>
+    <p>your cookies:</p>
+    <ul>
+        {% for i in cookies.keys() %}
+        <li>{{ i }} : {{ cookies[i] }}</li>
+        {% endfor %}
+    </ul>
+</div>
+<button onclick="location.href='/api/logout'">退出</button>
+</html>
