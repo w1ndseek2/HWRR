@@ -2,13 +2,15 @@
 import json
 from flask import Flask, session, request, redirect, jsonify, send_file, render_template
 import MySQLdb
-import ans
+import DynamicProcess
 import json
 import coloredlogs
 import logging
+import os
+
 app = Flask(__name__)
 app.secret_key = 'seasdf'
-conn = MySQLdb.connect(host='localhost', user='username',
+conn = MySQLdb.connect(host=os.getenv('DB_URL') or 'localhost', user='username',
                        passwd='password', db='test2')
 log = logging.getLogger(__name__)
 coloredlogs.install(
@@ -56,7 +58,7 @@ def submit():
             "select sign from user where username=\"{}\";".format(
                 session['username'])
         )
-        result = ans.match(json.loads(true_data[0]), _data)
+        result = DynamicProcess.match(json.loads(true_data[0]), _data)
         if result:
             session['logged_in'] = True
         return str(result)
@@ -96,10 +98,10 @@ def index():
         return render_template('guest.html')
     return render_template('user.html', cookies=session)
 
-
-@app.route('/api/redict')
-def detail():
-    return send_file("./frontpage.html")
+#干什么的？
+# @app.route('/api/redict')
+# def detail():
+#     return send_file("./frontpage.html")
 
 #注册
 @app.route('/api/register', methods=['POST'])
