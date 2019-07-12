@@ -1,13 +1,14 @@
 #coding:utf-8
 import json
 from flask import Flask, session, request, redirect, jsonify, send_file, render_template
-import MySQLdb
+import pymysql as MySQLdb
 import DynamicProcess
 import json
 import coloredlogs
 import logging
 import os
 
+MySQLdb.install_as_MySQLdb()
 app = Flask(__name__)
 app.secret_key = 'seasdf'
 conn = MySQLdb.connect(host=os.getenv('DB_URL') or 'localhost', user='username',
