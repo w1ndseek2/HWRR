@@ -1,0 +1,8 @@
+flask
+pymysql
+coloredlogs
+uwsgi
+numpy
+matplotlib
+scipy
+pydtw
