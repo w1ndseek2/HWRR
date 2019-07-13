@@ -120,14 +120,14 @@ def reigster():
     execute_sql(
         f"insert into user (id,username,password,sign) values (NULL,\"{username}\",\"{password}\",'');"
     )
-    return redirect('/signature_pad-3.0.0-beta/docs/index.html')
+    return redirect('/sigpad/index.html')
 
 #登陆
 @app.route('/api/login', methods=['POST'])
 def login():
     username = request.form['username']
     session['username'] = username.replace('\"', '')
-    return redirect('/signature_pad-3.0.0-beta/docs/index.html')
+    return redirect('/sigpad/index.html')
 
 #初始化数据库
 @app.route('/api/db_init', methods=['GET'])
