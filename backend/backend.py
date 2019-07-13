@@ -1,17 +1,22 @@
 #coding:utf-8
 import json
 from flask import Flask, session, request, redirect, jsonify, send_file, render_template
-import MySQLdb
-import DynamicProcess
+import pymysql as MySQLdb
+import ans
 import json
 import coloredlogs
 import logging
 import os
 
+MySQLdb.install_as_MySQLdb()
 app = Flask(__name__)
 app.secret_key = 'seasdf'
-conn = MySQLdb.connect(host=os.getenv('DB_URL') or 'localhost', user='username',
-                       passwd='password', db='test2')
+conn = MySQLdb.connect(
+    host=os.getenv('DB_URL') or 'localhost',
+    user=os.getenv('DB_USER') or 'username',
+    passwd=os.getenv('DB_PWD') or 'password',
+    db=os.getenv('DB_NAME') or 'test2'
+)
 log = logging.getLogger(__name__)
 coloredlogs.install(
     level='INFO',
@@ -55,10 +60,9 @@ def submit():
 
     if 'password' not in session.keys():
         true_data = execute_sql(
-            "select sign from user where username=\"{}\";".format(
-                session['username'])
+            f"SELECT sign FROM user WHERE username=\"{session['username']}\";"
         )
-        result = DynamicProcess.match(json.loads(true_data[0]), _data)
+        result = ans.match(json.loads(true_data[0]), _data)
         if result:
             session['logged_in'] = True
         return str(result)
@@ -75,8 +79,8 @@ def submit():
         log.info('获取到了三组信息，成功注册')
         log.debug(session['data'])
         execute_sql(
-            f'update user set sign=\"{json.dumps(session["data"])}\" ' +
-            f'where username=\"{session["username"]}\" and password=\"{session["password"]}\"'
+            f'UPDATE user SET sign=\"{json.dumps(session["data"])}\" ' +
+            f'WHERE username=\"{session["username"]}\" and password=\"{session["password"]}\"'
         )
         session.pop('username')
         session.pop('password')
@@ -119,23 +123,27 @@ def reigster():
     execute_sql(
         f"insert into user (id,username,password,sign) values (NULL,\"{username}\",\"{password}\",'');"
     )
-    return redirect('/signature_pad-3.0.0-beta/docs/index.html')
+    return redirect('/static/sigpad.html')
 
 #登陆
 @app.route('/api/login', methods=['POST'])
 def login():
     username = request.form['username']
     session['username'] = username.replace('\"', '')
-    return redirect('/signature_pad-3.0.0-beta/docs/index.html')
+    return redirect('/static/sigpad.html')
 
 #初始化数据库
 @app.route('/api/db_init', methods=['GET'])
 def db_init():
     init_sqls = [
         "DROP TABLE IF EXISTS user",
-        "CREATE TABLE user (id int primary key,username varchar(50) NOT NULL, password varchar(50) NOT NULL,sign text);",
-        "alter table user modify id int auto_increment;",
-        "insert into user (id,username,password,sign) values (NULL,'admin','admin','');"
+        "CREATE TABLE user (\
+            id int primary key auto_increment,\
+            username varchar(50) NOT NULL,\
+            password varchar(50) NOT NULL,\
+            sign text NOT NULL\
+        );",
+        "INSERT INTO user (id,username,password,sign) VALUES (NULL,'admin','admin','');"
     ]
     for i in init_sqls:
         execute_sql(i)

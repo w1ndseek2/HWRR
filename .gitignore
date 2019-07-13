@@ -3,5 +3,7 @@
 bin/
 __pycache__
 .vscode
-logs
+logs/
 node_modules
+.data
+package-lock.json
