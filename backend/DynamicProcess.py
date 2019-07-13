@@ -86,21 +86,21 @@ class PreProcess():
 class ImprovedSplit():
     @staticmethod
     def is_jida(lst, i):
-        if lst[i] >= lst[i - 5] and lst[i] >= lst[i - 4] and lst[i] >= lst[
-                i - 3] and lst[i] >= lst[i - 2] and lst[i] >= lst[
-                    i - 1] and lst[i] >= lst[i + 1] and lst[i] >= lst[
-                        i + 2] and lst[i] >= lst[i + 3] and lst[i] >= lst[
-                            i + 4] and lst[i] >= lst[i + 5]:
-            return 1
+        for k in range(-5, 6):
+            if i == 0:
+                continue
+            if lst[i] < lst[i + k]:
+                return False
+        return True
 
     @staticmethod
     def is_jixiao(lst, i):
-        if lst[i] <= lst[i - 5] and lst[i] <= lst[i - 4] and lst[i] <= lst[
-                i - 3] and lst[i] <= lst[i - 2] and lst[i] <= lst[
-                    i - 1] and lst[i] <= lst[i + 1] and lst[i] <= lst[
-                        i + 2] and lst[i] <= lst[i + 3] and lst[i] <= lst[
-                            i + 4] and lst[i] <= lst[i + 5]:
-            return 1
+        for k in range(-5, 6):
+            if i == 0:
+                continue
+            if lst[i] > lst[i + k]:
+                return False
+        return True
 
     @staticmethod
     def search(lst):

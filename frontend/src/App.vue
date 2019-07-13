@@ -12,11 +12,11 @@
               <el-menu-item-group>
                 <el-menu-item
                   index="1-1"
-                  onclick="window.frames['bdIframe'].src='http://192.168.1.235/static/login.html'"
+                  onclick="window.frames['bdIframe'].src='/static/login.html'"
                 >登陆</el-menu-item>
                 <el-menu-item
                   index="1-2"
-                  onclick="window.frames['bdIframe'].src='http://192.168.1.235/static/register.html'"
+                  onclick="window.frames['bdIframe'].src='/static/register.html'"
                 >注册</el-menu-item>
               </el-menu-item-group>
             </el-submenu>
@@ -46,7 +46,7 @@
           <iframe
             ref="iframe"
             id="bdIframe"
-            src="http://192.168.1.235/api/index"
+            src="/api/index"
             frameborder="0"
             scrolling="auto"
           ></iframe>

@@ -117,13 +117,13 @@ returnDataButton.addEventListener("click", function (event){
               else document.body.innerText = '登陆失败';
             }
             else if(a.responseText != 'continue'){
-              window.location.href = "../docs/success.html";
+              window.location.href = "/static/success.html";
             }
             else{
               clear_button.click();
             }
           } else {
-              window.location.href = "../docs/error.html";
+              window.location.href = "/static/error.html";
           }
       }
     })
