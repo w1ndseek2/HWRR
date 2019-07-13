@@ -188,7 +188,8 @@ class ImprovedSplit():
         flag1 = 0
         flag2 = 0
         avg_dis = abs(np.mean(lst1) - np.mean(lst2))
-        while (ImprovedSplit.search(lst1[x1 + 1:]) and ImprovedSplit.search(lst2[x2 + 1:])):
+        while (ImprovedSplit.search(lst1[x1 + 1:])
+               and ImprovedSplit.search(lst2[x2 + 1:])):
             tmp1 = lst1[x1 + 1:]
             tmp2 = lst2[x2 + 1:]
             x1, flag1 = ImprovedSplit.fengedian(x1, tmp1)
@@ -209,9 +210,9 @@ class ImprovedSplit():
                     x2, flag2 = ImprovedSplit.fengedian(x2, tmp2)
                     split2 = x2
                     # print x1, x2
-                    x1, x2, is_lst1_long = ImprovedSplit.adjust(x1, x2, fengedian1,
-                                                  fengedian2, lst1, lst2, tmp1,
-                                                  tmp2, flag1, flag2)
+                    x1, x2, is_lst1_long = ImprovedSplit.adjust(
+                        x1, x2, fengedian1, fengedian2, lst1, lst2, tmp1, tmp2,
+                        flag1, flag2)
                     # print x1, x2
                 while (is_lst1_long == 0 and x2 == split2):
                     # print 'lst2 long: ', x1, x2
@@ -222,14 +223,14 @@ class ImprovedSplit():
                     x1, flag1 = ImprovedSplit.fengedian(x1, tmp1)
                     split1 = x1
                     # print x1, x2
-                    x1, x2, is_lst1_long = ImprovedSplit.adjust(x1, x2, fengedian1,
-                                                  fengedian2, lst1, lst2, tmp1,
-                                                  tmp2, flag1, flag2)
+                    x1, x2, is_lst1_long = ImprovedSplit.adjust(
+                        x1, x2, fengedian1, fengedian2, lst1, lst2, tmp1, tmp2,
+                        flag1, flag2)
                     # print x1, x2
             else:
-                x1, x2, is_lst1_long = ImprovedSplit.adjust(x1, x2, fengedian1, fengedian2,
-                                              lst1, lst2, tmp1, tmp2, flag1,
-                                              flag2)
+                x1, x2, is_lst1_long = ImprovedSplit.adjust(
+                    x1, x2, fengedian1, fengedian2, lst1, lst2, tmp1, tmp2,
+                    flag1, flag2)
             if not is_break:
                 fengedian1.append(x1)
                 fengedian2.append(x2)
@@ -262,7 +263,7 @@ class DynamicProcess():
     @staticmethod
     def compare(real_list, test_list):
         return DynamicProcess.precompare(real_list,
-                                        PreProcess.spline(test_list))
+                                         PreProcess.spline(test_list))
 
     @staticmethod
     def precompare(real_list, test_list):
@@ -282,7 +283,7 @@ class DynamicProcess():
         return ret_list
 
     @staticmethod
-    def pre_length(prl):
+    def pre_value(prl):
         d_x = []
         d_y = []
         for i in range(len(prl)):
@@ -295,8 +296,13 @@ class DynamicProcess():
 
 def match(preprocessd_real_list, pre_length, compare_list, limit=0.6):
     x = DynamicProcess.compare(preprocessd_real_list, compare_list)
-    return x * limit < pre_length
+    res = x * limit
+    # maybe should update the pre_value.
+    if res < pre_length:
+        return True, (res + pre_length) / 2
+    else:
+        return False, pre_length
 
 
 prepare_list = DynamicProcess.pre_real_list
-prepare_value = DynamicProcess.pre_length
+prepare_value = DynamicProcess.pre_value
