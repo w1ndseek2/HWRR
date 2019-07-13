@@ -11,18 +11,11 @@ RUN apk add --no-cache -X http://mirrors.ustc.edu.cn/alpine/edge/testing py3-mat
 RUN mkdir -p /opt/backend
 WORKDIR /opt/backend
 
-RUN pip3 install flask PyMySQL coloredlogs uwsgi pydtw\
+RUN pip3 install flask PyMySQL coloredlogs uwsgi dtw interval\
      -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache
 
 COPY . /opt/backend
+RUN chmod +x /opt/backend/docker-entrypoint.sh
 EXPOSE 8081
 
-CMD [\
-    "uwsgi",\
-    "--http", "0.0.0.0:8081",\
-    "--plugin", "python",\
-    "--wsgi-file", "backend.py",\
-    "--callable","app",\
-    "--processes", "4",\
-    "--threads", "2"\
-    ]
+CMD ["/opt/backend/docker-entrypoint.sh"]
