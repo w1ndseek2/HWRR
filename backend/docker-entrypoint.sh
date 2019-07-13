@@ -10,7 +10,7 @@ if [ -n "$DB_URL" ]
         echo -n '.';
         sleep 1;
     done
-    echo "$database is ready"
+    echo "$DB_URL is ready"
     # Give it another second.
     sleep 1;
 fi
