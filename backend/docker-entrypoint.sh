@@ -22,3 +22,4 @@ exec uwsgi\
     --callable app\
     --processes 4\
     --threads 2\
+    --buffer-size 32768\

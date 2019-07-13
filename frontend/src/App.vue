@@ -18,6 +18,10 @@
                   index="1-2"
                   onclick="window.frames['bdIframe'].src='/static/register.html'"
                 >注册</el-menu-item>
+                <el-menu-item
+                  index="1-3"
+                  onclick="window.frames['bdIframe'].src='/static/update.html'"
+                >识别优化</el-menu-item>
               </el-menu-item-group>
             </el-submenu>
             <el-submenu index="2">
@@ -37,7 +41,10 @@
               <el-menu-item-group>
                 <el-menu-item index="3-1">gmail</el-menu-item>
                 <el-menu-item index="3-2">telephone</el-menu-item>
-                <el-menu-item index="3-2">github</el-menu-item>
+                <el-menu-item
+                  index="3-2"
+                  onclick="location.href='https://github.com/w1ndseek2/HWRR'"
+                >github</el-menu-item>
               </el-menu-item-group>
             </el-submenu>
           </el-menu>
