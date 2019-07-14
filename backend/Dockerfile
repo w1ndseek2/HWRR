@@ -11,7 +11,7 @@ RUN apk add --no-cache -X http://mirrors.ustc.edu.cn/alpine/edge/testing py3-mat
 RUN mkdir -p /opt/backend
 WORKDIR /opt/backend
 
-RUN pip3 install flask PyMySQL coloredlogs uwsgi dtw interval\
+RUN pip3 install flask PyMySQL coloredlogs uwsgi dtw interval redis\
      -i https://pypi.tuna.tsinghua.edu.cn/simple --no-cache
 
 COPY . /opt/backend

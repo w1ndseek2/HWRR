@@ -1,12 +1,17 @@
 import json
-from flask import Flask, session, request, redirect, send_file, render_template
+from flask import (
+    Flask, session,
+    request, redirect,
+    send_file, render_template
+)
+
 import DynamicProcess
-import json
 from utils import (
     getLoggger,
     merge_data,
     verify,
-    execute_sql
+    execute_sql,
+    cache
 )
 
 app = Flask(__name__)
@@ -38,24 +43,30 @@ def pre_register():
     return redirect('/static/sigpad.html')
 
 
-register_data = {}
-
-
 def register(_data):
-    if session['username'] not in register_data.keys():
+    if not cache.exists(session['username']):
         log.info('设置register_data[session[\'username\']]为空')
-        register_data[session['username']] = []
+        cache.set(session['username']+'.count', 0, ex=600)
+        # expires in 10 minutes
+    session['action'] = 'register'
     if verify(_data):
-        register_data[session['username']].append(_data)
+        cache.rpush(session['username'], json.dumps(_data))
+        cache.incr(session['username']+'.count')
+
         log.info('获取到了一组合法签名数据')
         log.debug(_data)
-    if len(register_data[session['username']]) == 3:
+    if int(cache.get(session['username']+'.count')) >= 3:
         log.info('获取到了三组信息，成功注册')
+
         log.debug('所有数据:')
-        log.debug(register_data[session['username']])
-        real = DynamicProcess.prepare_list(
-            json.dumps(register_data[session["username"]])
-        )
+        register_data = cache.lrange(session['username'], 0, -1)
+        register_data = [json.loads(i) for i in register_data]
+        log.debug(register_data)
+
+        cache.delete(session['username'])
+        cache.delete(session['username']+'.count')
+
+        real = DynamicProcess.prepare_list(register_data)
         real_v = DynamicProcess.prepare_value(real)
         execute_sql(
             "INSERT INTO user (username, password, sign_prepared, sign_val) values (\
@@ -63,10 +74,9 @@ def register(_data):
             )",
             username=session['username'],
             password=session['password'],
-            sign_prepared=real,
+            sign_prepared=json.dumps(real),
             sign_val=real_v
         )
-        register_data.pop(session['username'])
         session.pop('username')
         session.pop('password')
         return 'ret'
@@ -88,7 +98,7 @@ def login(_data):
         username=session['username']
     )
     result, new_prepared = DynamicProcess.match(
-        true_data[0], true_data[1],
+        json.loads(true_data[0]), float(true_data[1]),
         _data, limit=0.6
     )
     if result:
@@ -165,7 +175,7 @@ def db_init():
             username varchar(50) NOT NULL,\
             password varchar(50) NOT NULL,\
             sign_prepared text,\
-            sign_val text\
+            sign_val float\
         );",
         "INSERT INTO user (username,password) VALUES ('admin','admin');"
     ]

@@ -1,21 +1,28 @@
 import logging
 import coloredlogs
 import pymysql
+from redis import Redis
 import os
+
 pymysql.install_as_MySQLdb()
-conn = pymysql.connect(
+db = pymysql.connect(
     host=os.getenv('DB_URL') or 'localhost',
     user=os.getenv('DB_USER') or 'username',
     passwd=os.getenv('DB_PWD') or 'password',
     db=os.getenv('DB_NAME') or 'test2'
 )
-
+cache = Redis(
+    host=os.getenv('CACHE_URL') or 'localhost',
+    port=int(os.getenv('CACHE_PORT')) if os.getenv('CACHE_PORT') else 6379,
+    password=os.getenv('CACHE_PWD') or ''
+)
 
 def execute_sql(sql, **kwargs):
-    cursor = conn.cursor()
+    cursor = db.cursor()
     cursor.execute(sql, kwargs)
-    conn.commit()
-    return cursor.fetchall()[0]
+    db.commit()
+    x = cursor.fetchall()
+    return x[0] if x else None
 
 
 def merge_data(data):
@@ -29,10 +36,10 @@ def verify(data):
     return len(data) == 3 and len(data[0]) >= 3
 
 
-def getLoggger(__name__=__name__):
+def getLoggger(__name__=__name__, level='INFO'):
     log = logging.getLogger(__name__)
     coloredlogs.install(
-        level='INFO',
+        level=level,
         logger=log
     )
     return log

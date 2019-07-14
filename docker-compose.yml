@@ -25,6 +25,9 @@ services:
       - DB_USER=username
       - DB_PWD=password
       - DB_NAME=test2
+      - CACHE_URL=cache
+      - CACHE_PORT=6379
+      - CACHE_PWD=ru1aifozuba0y0u_xds3c
     restart: always
     networks:
       internal:
@@ -40,10 +43,16 @@ services:
     volumes:
       - .data/mysql:/var/lib/mysql
     networks:
-        internal:
+      internal:
     # This command is required to set important mariadb defaults
     command: [mysqld, --character-set-server=utf8mb4, --collation-server=utf8mb4_unicode_ci, --wait_timeout=28800, --log-warnings=0]
   
+  cache:
+    image: redis
+    restart: always
+    command: redis-server --requirepass ru1aifozuba0y0u_xds3c
+    networks:
+      internal:
   # frontend:
 
 networks:
