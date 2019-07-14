@@ -46,16 +46,16 @@ def pre_register():
 def register(_data):
     if not cache.exists(session['username']):
         log.info('设置register_data[session[\'username\']]为空')
-        cache.set(session['username']+'.count', 0, ex=600)
+        cache.set(session['username'] + '.count', 0, ex=600)
         # expires in 10 minutes
     session['action'] = 'register'
     if verify(_data):
         cache.rpush(session['username'], json.dumps(_data))
-        cache.incr(session['username']+'.count')
+        cache.incr(session['username'] + '.count')
 
         log.info('获取到了一组合法签名数据')
         log.debug(_data)
-    if int(cache.get(session['username']+'.count')) >= 3:
+    if int(cache.get(session['username'] + '.count')) >= 3:
         log.info('获取到了三组信息，成功注册')
 
         log.debug('所有数据:')
@@ -64,7 +64,7 @@ def register(_data):
         log.debug(register_data)
 
         cache.delete(session['username'])
-        cache.delete(session['username']+'.count')
+        cache.delete(session['username'] + '.count')
 
         real = DynamicProcess.prepare_list(register_data)
         real_v = DynamicProcess.prepare_value(real)
@@ -87,6 +87,12 @@ def register(_data):
 @app.route('/api/login', methods=['POST'])
 def pre_login():
     username = request.form['username']
+    ret = execute_sql(
+        'SELECT username FROM user WHERE username=%(username)s',
+        username=username
+    )
+    if ret is None or len(ret) == 0:
+        return 'this username hasn\'t been registered yet'
     session['username'] = username.replace('\"', '')
     session['action'] = 'login'
     return redirect('/static/sigpad.html')
@@ -127,7 +133,22 @@ def pre_update():
 
 
 def update(_data):
-    return 'not implemented'
+    true_data = execute_sql(
+        "SELECT sign_prepared, sign_val FROM user WHERE username=%(username)s",
+        username=session['username']
+    )
+    result, new_prepared = DynamicProcess.match(
+        json.loads(true_data[0]), float(true_data[1]),
+        _data, limit=0.6
+    )
+    if result:
+        execute_sql(
+            'UPDATE user SET sign_val=%(sign_v)s WHERE username=%(username)s',
+            sign_v=new_prepared,
+            username=session['username']
+        )
+        return 'success'
+    return 'failure'
 
 
 @app.route('/api/submit', methods=['POST'])
