@@ -17,7 +17,7 @@ function resizeCanvas() {
   // When zoomed out to less than 100%, for some very strange reason,
   // some browsers report devicePixelRatio as less than 1
   // and only part of the canvas is cleared then.
-  var ratio =  Math.max(window.devicePixelRatio || 1, 1);
+  var ratio = Math.max(window.devicePixelRatio || 1, 1);
 
   // This part causes the canvas to be cleared
   canvas.width = canvas.offsetWidth * ratio;
@@ -96,10 +96,10 @@ savePNGButton.addEventListener("click", function (event) {
 });
 var clear_button = document.querySelector('button.button.clear');
 console.log(clear_button.click);
-returnDataButton.addEventListener("click", function (event){
-  if (signaturePad.isEmpty()){
+returnDataButton.addEventListener("click", function (event) {
+  if (signaturePad.isEmpty()) {
     alert("Please provide a signature first.");
-  }else{
+  } else {
     var dataURL = signaturePad.toData();
     var datas = JSON.stringify(dataURL);
     console.log(datas);
@@ -110,21 +110,25 @@ returnDataButton.addEventListener("click", function (event){
       dataType: 'json',
       contentType: 'application/json',
       complete: function (a) {
-          if (a.status === 200) {
-            console.log(a.responseText)
-            if(a.responseText == 'True' || a.responseText == 'False'){
-              if(a.responseText == 'True')location.href='/api/index';
-              else document.body.innerText = '登陆失败';
-            }
-            else if(a.responseText != 'continue'){
-              window.location.href = "/static/success.html";
-            }
-            else{
-              clear_button.click();
-            }
-          } else {
-              window.location.href = "/static/error.html";
+        if (a.status === 200) {
+          console.log(a.responseText)
+          if (a.responseText == 'True' || a.responseText == 'False') {
+            if (a.responseText == 'True') location.href = '/api/index';
+            else document.body.innerText = '登陆失败';
           }
+          else if (a.responseText == 'success' || a.responseText == 'failure') {
+            console.log(a.responseText);
+            clear_button.click();
+          }
+          else if (a.responseText != 'continue') {
+            window.location.href = "/static/success.html";
+          }
+          else {
+            clear_button.click();
+          }
+        } else {
+          window.location.href = "/static/error.html";
+        }
       }
     })
     //download(JSON.stringify(dataURL), "signature.json");

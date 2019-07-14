@@ -1,11 +1,20 @@
 <!DOCTYPE html>
-<h1>
-    TODO
-</h1>
-<h4>
-    识别优化<br>
-    反复提交<br>
-    调整limit<br>
-    达到优化准确率的效果<br>
-    需要密码认证
-</h4>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>识别优化</title>
+    <link href="css/form.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div class="wrap">
+        <div class="container">
+            <h1>Optimize</h1>
+            <form action="/api/update" method="POST">
+              <input name="username" type="text" placeholder="input your name here">
+              <input name="password" type="password" placeholder="input your password here">
+              <input type="submit" value="登陆">
+            </form>
+        </div>
+    </div>
+</body>
+</html>

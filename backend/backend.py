@@ -117,7 +117,7 @@ def login(_data):
     return str(result)
 
 
-@app.route('/api/update')
+@app.route('/api/update', methods=['POST'])
 def pre_update():
     username = request.form['username']
     password = request.form['password']
@@ -129,7 +129,7 @@ def pre_update():
     if ret[0] != password:
         return render_template('wrong_pass.html')
     session['action'] = 'update'
-    return redirect
+    return redirect('/static/sigpad.html')
 
 
 def update(_data):
@@ -137,10 +137,12 @@ def update(_data):
         "SELECT sign_prepared, sign_val FROM user WHERE username=%(username)s",
         username=session['username']
     )
-    result, new_prepared = DynamicProcess.match(
-        json.loads(true_data[0]), float(true_data[1]),
-        _data, limit=0.6
-    )
+    result = False
+    if true_data:
+        result, new_prepared = DynamicProcess.match(
+            json.loads(true_data[0]), float(true_data[1]),
+            _data, limit=0.6
+        )
     if result:
         execute_sql(
             'UPDATE user SET sign_val=%(sign_v)s WHERE username=%(username)s',
