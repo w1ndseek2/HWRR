@@ -15,7 +15,7 @@ def execute_sql(sql, **kwargs):
     cursor = conn.cursor()
     cursor.execute(sql, kwargs)
     conn.commit()
-    return cursor.fetchone()
+    return cursor.fetchall()[0]
 
 
 def merge_data(data):
