@@ -299,7 +299,7 @@ def match(preprocessd_real_list, pre_length, compare_list, limit=0.6):
     res = x * limit
     # maybe should update the pre_value.
     if res < pre_length:
-        return True, (res + pre_length) / 2
+        return True, (x + pre_length) / 2
     else:
         return False, pre_length
 
