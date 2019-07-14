@@ -6,4 +6,3 @@ __pycache__
 logs/
 node_modules
 .data
-package-lock.json
