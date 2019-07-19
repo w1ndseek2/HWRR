@@ -23,10 +23,7 @@
         <nav class="navbar navbar-expand-lg navbar-light">
           <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
-              <li class="active"><a id="home" class="nav-link" href="#">Home</a></li>
-              <li><a id="login" class="nav-link" href="#">登陆</a></li>
-              <li><a id="register" class="nav-link" href="#">注册</a></li>
-              <li><a id="optimize" class="nav-link" href="#">优化识别</a></li>
+              <!-- to be injected -->
             </ul>
         </nav>
       </div>
@@ -59,7 +56,6 @@
               type: 'GET',
               url: '/api/show_info',
               complete: function (a) {
-                console.log(a.responseText)
                 var json = JSON.parse(a.responseText)
                 document.querySelector('#user_role').innerHTML = json['role']
                 if(json['logged_in']){
@@ -78,23 +74,42 @@
 </body>
 <script>
   const buttons = new Map([
-    ['home', ['#home', '/page/home']],
-    ['login', ['#login', '/page/login']],
-    ['register', ['#register', '/page/register']],
-    ['optimize', ['#optimize', '/page/optimize']]
+    ['home', ['/page/home', '主页']],
+    ['login', ['/page/login', '登陆']],
+    ['register', ['/page/register', '注册']],
+    ['optimize', ['/page/optimize', '识别优化']]
   ])
   const frame = document.getElementById('bdIframe')
-  buttons.forEach(function (val, i) {
-    buttons.get(i)[0] = document.querySelector(val[0])
-    buttons.get(i)[0].onclick = function (x) {
-      clearActive()
-      this.parentElement.classList.add('active')
-      frame.src = buttons.get(i)[1];
+  $.ajax({
+    method: 'GET',
+    url: '/api/actions',
+    complete: function(a) {
+      var res = JSON.parse(a.responseText)
+      if (res != null)
+        for(const i of res)
+          buttons.set(i[0], i[1])
     }
+  }).then(function(){
+    const menuList = document.querySelector('ul.navbar-nav')
+    buttons.forEach(function(val, i){
+      var entry = document.createElement('li')
+      var element = document.createElement('a')
+      element.setAttribute('id', i)
+      element.setAttribute('class', 'nav-link')
+      element.setAttribute('href', '#')
+      element.innerText = val[1]
+      element.onclick = function (x) {
+        clearActive()
+        this.parentElement.classList.add('active')
+        frame.src = val[0];
+      }
+      entry.appendChild(element)
+      menuList.appendChild(entry)
+    })
   })
   function clearActive() {
     buttons.forEach(function (val, i) {
-      buttons.get(i)[0].parentElement.classList.remove('active')
+      document.querySelector('#'+i).parentElement.classList.remove('active')
     })
   }
 </script>

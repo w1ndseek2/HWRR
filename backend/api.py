@@ -35,11 +35,32 @@ log = getLoggger()
 def ses():
     info = {'role': 'unknown'}
     if 'username' in session.keys():
-        info = users.getInfo(username=session['username'])
+        info = users.getInfo(session['username'])
     return json.dumps(info)
 
 
-# 注册
+@api.route('/logout')
+def logout():
+    if 'username' in session.keys():
+        users.setLoginStatus(session['username'], False)
+    return redirect('/')
+
+
+@api.route('/actions')
+def actions():
+    if 'username' not in session.keys():
+        return '[]'
+    print(session['username'])
+    res = users.getInfo(session['username'])
+    if res['logged_in']:
+        if res['role'] == 'teacher':
+            return json.dumps([['review', ['/page/review', '批阅假条']]])
+        else:
+            return json.dumps([['request', ['/page/request', '请假']]])
+    else:
+        return '[]'
+
+
 @api.route('/register', methods=['POST'])
 def pre_register():
     for i in ['username', 'password', 'role']:
@@ -201,13 +222,6 @@ def submit():
         return optimize(_data)
     else:
         return 'unexpected action'
-
-
-@api.route('/logout')
-def logout():
-    if 'username' in session.keys():
-        users.setLoginStatus(session['username'], False)
-    return redirect('/')
 
 
 # 初始化数据库
