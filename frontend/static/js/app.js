@@ -74,8 +74,7 @@ savePNGButton.addEventListener("click", function (event) {
     download(dataURL, "signature.png");
   }
 });
-var clear_button = document.querySelector('button.button.clear');
-console.log(clear_button.click);
+console.log(clearButton.click);
 returnDataButton.addEventListener("click", function (event) {
   if (signaturePad.isEmpty()) {
     alert("Please provide a signature first.");
@@ -93,21 +92,21 @@ returnDataButton.addEventListener("click", function (event) {
         if (a.status === 200) {
           console.log(a.responseText)
           if (a.responseText == 'True' || a.responseText == 'False') {
-            if (a.responseText == 'True') location.href = '/api/index';
+            if (a.responseText == 'True') location.href = '/page/index';
             else document.body.innerText = '登陆失败';
           }
           else if (a.responseText == 'success' || a.responseText == 'failure') {
             console.log(a.responseText);
-            clear_button.click();
+            clearButton.click();
           }
-          else if (a.responseText != 'continue') {
-            window.location.href = "/static/success.html";
+          else if (a.responseText == 'ret') {
+            window.location.href = "/page/success";
           }
-          else {
-            clear_button.click();
+          else if (a.responseText == 'continue') {
+            clearButton.click();
           }
         } else {
-          window.location.href = "/static/error.html";
+          window.location.href = "/page/error";
         }
       }
     })

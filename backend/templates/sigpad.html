@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/static/css/sigpad.css">
+</head>
+<body>
+  <div id="signature-pad" class="signature-pad">
+    <div class="signature-pad--body">
+      <canvas></canvas>
+    </div>
+    <div class="signature-pad--footer">
+      <div class="description">Sign above</div>
+
+      <div class="signature-pad--actions">
+        <div>
+          <button class="signature-pad--button" data-action="save-png">保存图片</button>
+          <button class="signature-pad--button" data-action="undo">撤销</button>
+          <button class="signature-pad--button" data-action="clear">清空</button>
+          <button class="signature-pad--button" data-action="return-data">提交</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="/static/js/jquery-3.3.1.min.js"></script>
+  <script src="/static/js/sigpad.umd.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

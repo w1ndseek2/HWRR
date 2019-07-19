@@ -18,7 +18,7 @@ fi
 exec uwsgi\
     --http '0.0.0.0:8081'\
     --plugin python\
-    --wsgi-file backend.py\
+    --wsgi-file app.py\
     --callable app\
     --processes 4\
     --threads 2\

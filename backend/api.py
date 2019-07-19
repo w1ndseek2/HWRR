@@ -1,46 +1,66 @@
 import json
 from flask import (
-    Flask, session,
+    Blueprint, session,
     request, redirect,
     send_file, render_template
 )
 
 import DynamicProcess
-from utils import (
-    getLoggger,
-    merge_data,
-    verify,
-    execute_sql,
-    cache
-)
 
-app = Flask(__name__)
-app.secret_key = 'seasdf'
+try:
+    import backend.users
+    from backend.utils import (
+        getLoggger,
+        merge_data,
+        verify,
+        execute_sql,
+        cache
+    )
+except:
+    import users
+    from utils import (
+        getLoggger,
+        merge_data,
+        verify,
+        execute_sql,
+        cache
+    )
+
+api = Blueprint('api', __name__)
+api.secret_key = 'seasdf'
 log = getLoggger()
 
 
-@app.route('/show_session')
+@api.route('/show_info')
 def ses():
-    return json.dumps(dict(session))
+    info = {'role': 'unknown'}
+    if 'username' in session.keys():
+        info = users.getInfo(username=session['username'])
+    return json.dumps(info)
 
 
 # 注册
-@app.route('/api/register', methods=['POST'])
+@api.route('/register', methods=['POST'])
 def pre_register():
+    for i in ['username', 'password', 'role']:
+        if i not in request.form.keys():
+            return render_template('error.html', messages=['invalid request'])
     username = request.form['username']
-    password = request.form['password']
     username = username.replace('\"', '')
-    password = password.replace('\"', '')
     ret = execute_sql(
         'SELECT username FROM user WHERE username=%(username)s',
         username=username
     )
     if ret is not None and len(ret) > 0:
-        return 'this username has been registered'
+        return render_template('error.html', messages=[
+            '用户名已存在',
+            'this username has been registered'
+        ])
     session['username'] = username
-    session['password'] = password
+    session['password'] = request.form['password'].replace('\"', '')
+    session['role'] = request.form['role'].replace('\"', '')
     session['action'] = 'register'
-    return redirect('/static/sigpad.html')
+    return redirect('/page/sigpad')
 
 
 def register(_data):
@@ -69,33 +89,36 @@ def register(_data):
         real = DynamicProcess.prepare_list(register_data)
         real_v = DynamicProcess.prepare_value(real)
         execute_sql(
-            "INSERT INTO user (username, password, sign_prepared, sign_val) values (\
-                %(username)s, %(password)s, %(sign_prepared)s, %(sign_val)s\
+            "INSERT INTO user (username, password, sign_prepared, sign_val, role) values (\
+                %(username)s, %(password)s, %(sign_prepared)s, %(sign_val)s, %(role)s \
             )",
             username=session['username'],
             password=session['password'],
             sign_prepared=json.dumps(real),
-            sign_val=real_v
+            sign_val=real_v,
+            role=session['role']
         )
         session.pop('username')
         session.pop('password')
+        session.pop('role')
         return 'ret'
     return 'continue'
 
 
 # 登陆
-@app.route('/api/login', methods=['POST'])
+@api.route('/login', methods=['POST'])
 def pre_login():
     username = request.form['username']
+    username = username.replace('"', '')
     ret = execute_sql(
         'SELECT username FROM user WHERE username=%(username)s',
         username=username
     )
     if ret is None or len(ret) == 0:
         return 'this username hasn\'t been registered yet'
-    session['username'] = username.replace('\"', '')
+    session['username'] = username
     session['action'] = 'login'
-    return redirect('/static/sigpad.html')
+    return redirect('/page/sigpad')
 
 
 def login(_data):
@@ -107,17 +130,22 @@ def login(_data):
         json.loads(true_data[0]), float(true_data[1]),
         _data, limit=0.6
     )
+    role = execute_sql(
+        "SELECT role FROM user WHERE username=%(username)s",
+        username=session['username']
+    )[0]
     if result:
         execute_sql(
             'UPDATE user SET sign_val=%(sign_v)s WHERE username=%(username)s',
             sign_v=new_prepared,
             username=session['username']
         )
-        session['logged_in'] = True
+        users.setLoginStatus(session['username'], True)
+        # 一小时内免登录
     return str(result)
 
 
-@app.route('/api/update', methods=['POST'])
+@api.route('/update', methods=['POST'])
 def pre_update():
     username = request.form['username']
     password = request.form['password']
@@ -129,7 +157,7 @@ def pre_update():
     if ret[0] != password:
         return render_template('wrong_pass.html')
     session['action'] = 'update'
-    return redirect('/static/sigpad.html')
+    return redirect('/page/sigpad')
 
 
 def update(_data):
@@ -153,7 +181,7 @@ def update(_data):
     return 'failure'
 
 
-@app.route('/api/submit', methods=['POST'])
+@api.route('/submit', methods=['POST'])
 def submit():
     if 'username' not in session.keys():
         return 'illegal request'
@@ -174,22 +202,15 @@ def submit():
         return 'unexpected action'
 
 
-@app.route('/api/logout')
+@api.route('/logout')
 def logout():
-    if 'logged_in' in session.keys():
-        session.pop('logged_in')
-    return redirect('/api/index')
-
-
-@app.route('/api/index')
-def index():
-    if 'logged_in' not in session.keys():
-        return render_template('guest.html')
-    return render_template('user.html', cookies=session)
+    if 'username' in session.keys():
+        users.setLoginStatus(session['username'], False)
+    return redirect('/')
 
 
 # 初始化数据库
-@app.route('/api/db_init', methods=['GET'])
+@api.route('/db_init', methods=['GET'])
 def db_init():
     init_sqls = [
         "DROP TABLE IF EXISTS user",
@@ -198,14 +219,11 @@ def db_init():
             username varchar(50) NOT NULL,\
             password varchar(50) NOT NULL,\
             sign_prepared text,\
-            sign_val float\
+            sign_val float,\
+            role text\
         );",
         "INSERT INTO user (username,password) VALUES ('admin','admin');"
     ]
     for i in init_sqls:
         execute_sql(i)
     return 'init success'
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8081, debug=True)

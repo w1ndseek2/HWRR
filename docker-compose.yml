@@ -1,21 +1,6 @@
 version: '3.7'
 
 services:
-  nginx:
-    image: nginx
-    depends_on:
-      - api_backend
-      # - frontend
-    volumes:
-      - ./nginx_conf:/etc/nginx/conf.d
-      - ./frontend/dist:/var/www/frontend
-    restart: always
-    ports:
-      - "80:80"
-    networks:
-      default:
-      internal:
-  
   api_backend:
     build: ./backend/
     depends_on:

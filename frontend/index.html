@@ -1,12 +1,102 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>新型在线手写签名系统</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <title>表格</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/css/layout.css" rel="stylesheet">
+  <link href="/static/css/pure-min.css" rel="stylesheet" type="text/css">
+  <link href="/static/css/grids-responsive-min.css" rel="stylesheet" type="text/css" >
+  <script src="/static/js/jquery-3.3.1.min.js"></script>
+</head>
+
+<body>
+  <div class="body">
+    <div id="header">
+      <div class="title">
+        <div id="logo">请假批阅</div>
+        <p class="description">一个简单的介绍</p>
+      </div>
+      <div id="navigation">
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+              <li class="active"><a id="home" class="nav-link" href="#">Home</a></li>
+              <li><a id="login" class="nav-link" href="#">登陆</a></li>
+              <li><a id="register" class="nav-link" href="#">注册</a></li>
+              <li><a id="optimize" class="nav-link" href="#">优化识别</a></li>
+            </ul>
+        </nav>
+      </div>
+    </div>
+    <div class="pure-g">
+      <div class="pure-u-1 pure-u-md-3-4">
+        <div class="content">
+          <iframe id="bdIframe" frameborder="0" src="/page/home"></iframe>
+          <script>
+            function resizeIframe() {
+              const oIframe = document.getElementById('bdIframe')
+              const deviceWidth = document.querySelector('.content').clientWidth
+              const deviceHeight = document.documentElement.clientHeight - 140;
+              oIframe.style.width = Number(deviceWidth) + 'px' // 数字是页面布局宽度差值
+              oIframe.style.height = Number(deviceHeight) + 'px' // 数字是页面布局高度差
+            }
+            resizeIframe()
+            window.onresize = this.resizeIframe
+          </script>
+        </div>
+      </div>
+      <div class="pure-u-1-4 hidden_mid_and_down">
+        <div id="sidebar" class="profile">
+          <p>You Are: </p>
+          <p id=user_role style="font-size: medium">
+            
+          </p>
+          <script>
+            $.ajax({
+              type: 'GET',
+              url: '/api/show_info',
+              complete: function (a) {
+                console.log(a.responseText)
+                var json = JSON.parse(a.responseText)
+                document.querySelector('#user_role').innerHTML = json['role']
+                if(json['logged_in']){
+                  var logout_link = document.createElement('a')
+                  logout_link.setAttribute('href', 'api/logout')
+                  logout_link.innerText = '注销'
+                  document.querySelector('#sidebar').appendChild(logout_link)
+                }
+              }
+            })
+          </script>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  const buttons = new Map([
+    ['home', ['#home', '/page/home']],
+    ['login', ['#login', '/page/login']],
+    ['register', ['#register', '/page/register']],
+    ['optimize', ['#optimize', '/page/optimize']]
+  ])
+  const frame = document.getElementById('bdIframe')
+  buttons.forEach(function (val, i) {
+    buttons.get(i)[0] = document.querySelector(val[0])
+    buttons.get(i)[0].onclick = function (x) {
+      clearActive()
+      this.parentElement.classList.add('active')
+      frame.src = buttons.get(i)[1];
+    }
+  })
+  function clearActive() {
+    buttons.forEach(function (val, i) {
+      buttons.get(i)[0].parentElement.classList.remove('active')
+    })
+  }
+</script>
+
 </html>

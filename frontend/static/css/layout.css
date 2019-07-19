@@ -1,0 +1,101 @@
+.pure-g {
+    letter-spacing: -.31em;
+    text-rendering: optimizespeed;
+    font-family: FreeSans,Arimo,"Droid Sans",Helvetica,Arial,sans-serif;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-flex-flow: row wrap;
+    -ms-flex-flow: row wrap;
+    flex-flow: row wrap;
+    -webkit-align-content: flex-start;
+    -ms-flex-line-pack: start;
+    align-content: flex-start;
+}
+
+body {
+    background-color: #FFF;
+    color: #444;
+    font-family: "TIBch", "Classic Grotesque W01", "Helvetica Neue", Arial, "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "WenQuanYi Micro Hei", SimSun, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 14px;
+}
+
+#header {
+    padding: 58px 0 0;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    position: relative; 
+}
+#header .title #logo {
+    font: bold 40px/1.12 "Times New Roman", Georgia, Times, sans-serif;
+    color: #555;
+}
+#header .title #logo span, #header .title #logo:hover {
+    color: #777; 
+}
+#header .title .description {
+    margin: .2em 0 0;
+    color: #999;
+}
+#header #navigation {
+    margin: 10px 0 -1px;
+    padding: 0;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}
+#header #navigation a {
+    display: inline-block;
+    padding: 3px 20px 3px;
+    line-height: 30px;
+    color: #444;
+    font-size: 15px;
+    border: 1px solid transparent;
+}
+#header #navigation a:hover {
+    border-bottom-color: #444;
+}
+#header #navigation a.current {
+    border: 1px solid #ddd;
+    border-bottom-color: #fff; 
+}
+
+#sidebar {
+  border-left: 1px solid #ddd;
+  padding-left: 35px;
+  margin-top: 40px;
+  padding-bottom: 20px;
+  word-wrap: break-word;
+}
+
+.body {
+    padding: 0 60px;
+    max-width: 1150px;
+    margin: 0 auto;
+}
+
+.body.header.title{
+    font: bold 38px/1.12 "Times New Roman", Georgia, Times, sans-serif;
+    color: #555;
+    margin-bottom: 40px;
+}
+
+.body.header.navigation{
+    padding: 0;
+    margin: 10px 0 -1px;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+}
+
+.body.content{
+    padding-right: 50px;
+    padding-top: 20px;
+}
+
+.body.profile{
+    padding-right: 200px;
+}

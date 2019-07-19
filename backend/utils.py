@@ -4,6 +4,14 @@ import pymysql
 from redis import Redis
 import os
 
+def getLoggger(__name__=__name__, level='INFO'):
+    log = logging.getLogger(__name__)
+    coloredlogs.install(
+        level=level,
+        logger=log
+    )
+    return log
+
 pymysql.install_as_MySQLdb()
 db = pymysql.connect(
     host=os.getenv('DB_URL') or 'localhost',
@@ -16,8 +24,12 @@ cache = Redis(
     port=int(os.getenv('CACHE_PORT')) if os.getenv('CACHE_PORT') else 6379,
     password=os.getenv('CACHE_PWD') or ''
 )
+log = getLoggger()
 
 def execute_sql(sql, **kwargs):
+    log.info('executing:\n'+sql)
+    log.info('parameters:')
+    log.info(kwargs)
     cursor = db.cursor()
     cursor.execute(sql, kwargs)
     db.commit()
@@ -34,12 +46,3 @@ def merge_data(data):
 
 def verify(data):
     return len(data) == 3 and len(data[0]) >= 3
-
-
-def getLoggger(__name__=__name__, level='INFO'):
-    log = logging.getLogger(__name__)
-    coloredlogs.install(
-        level=level,
-        logger=log
-    )
-    return log
