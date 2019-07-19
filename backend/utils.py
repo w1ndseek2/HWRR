@@ -3,6 +3,7 @@ import coloredlogs
 import pymysql
 from redis import Redis
 import os
+import time
 
 
 def getLoggger(__name__=__name__, level='INFO'):
@@ -36,8 +37,12 @@ def get_secret_key():
     cache.set('secret_key', secret_key)
     return secret_key
 
-
+executing = False
 def execute_sql(sql, **kwargs):
+    global executing
+    while executing:
+        time.sleep(0.5)
+    executing = True
     log.info('executing:\n'+sql)
     log.info('parameters:')
     log.info(kwargs)
@@ -45,6 +50,7 @@ def execute_sql(sql, **kwargs):
     cursor.execute(sql, kwargs)
     db.commit()
     x = cursor.fetchall()
+    executing = False
     return x[0] if x else None
 
 
