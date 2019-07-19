@@ -3,7 +3,7 @@ from flask import Flask, redirect
 import redis
 import page
 import api
-from config import get_secret_key
+from utils import get_secret_key
 
 
 app = Flask(__name__)

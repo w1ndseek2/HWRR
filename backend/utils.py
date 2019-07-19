@@ -4,6 +4,7 @@ import pymysql
 from redis import Redis
 import os
 
+
 def getLoggger(__name__=__name__, level='INFO'):
     log = logging.getLogger(__name__)
     coloredlogs.install(
@@ -11,6 +12,7 @@ def getLoggger(__name__=__name__, level='INFO'):
         logger=log
     )
     return log
+
 
 pymysql.install_as_MySQLdb()
 db = pymysql.connect(
@@ -25,6 +27,15 @@ cache = Redis(
     password=os.getenv('CACHE_PWD') or ''
 )
 log = getLoggger()
+
+
+def get_secret_key():
+    if cache.exists('secret_key'):
+        return cache.get('secret_key')
+    secret_key = os.urandom(64)
+    cache.set('secret_key', secret_key)
+    return secret_key
+
 
 def execute_sql(sql, **kwargs):
     log.info('executing:\n'+sql)

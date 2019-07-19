@@ -5,6 +5,7 @@ from flask import (
     make_response,
     request, redirect
 )
+from users import getInfo
 
 try:
     from backend.utils import cache
@@ -18,7 +19,8 @@ page = Blueprint('page', __name__)
 def getPageRoute(page):
     if 'id' not in session.keys():
         session['id'] = os.urandom(32)
-    role = cache.get(session['id']).decode() or 'guest'
+    role = getInfo(session['username'])['role']\
+        if 'username' in session.keys() else 'unknown'
     return getPage(page, role)
 
 

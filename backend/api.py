@@ -145,8 +145,8 @@ def login(_data):
     return str(result)
 
 
-@api.route('/update', methods=['POST'])
-def pre_update():
+@api.route('/optimize', methods=['POST'])
+def pre_optimize():
     username = request.form['username']
     password = request.form['password']
     username = username.replace('\"', '')
@@ -155,12 +155,12 @@ def pre_update():
         username=username
     )
     if ret[0] != password:
-        return render_template('wrong_pass.html')
-    session['action'] = 'update'
+        return render_template('error.html', messages=['密码输入错误', 'wrong password'])
+    session['action'] = 'optimize'
     return redirect('/page/sigpad')
 
 
-def update(_data):
+def optimize(_data):
     true_data = execute_sql(
         "SELECT sign_prepared, sign_val FROM user WHERE username=%(username)s",
         username=session['username']
@@ -171,6 +171,7 @@ def update(_data):
             json.loads(true_data[0]), float(true_data[1]),
             _data, limit=0.6
         )
+    session['action'] = 'optimize'
     if result:
         execute_sql(
             'UPDATE user SET sign_val=%(sign_v)s WHERE username=%(username)s',
@@ -196,8 +197,8 @@ def submit():
         return login(_data)
     elif action == 'register':
         return register(_data)
-    elif action == 'update':
-        return update(_data)
+    elif action == 'optimize':
+        return optimize(_data)
     else:
         return 'unexpected action'
 
