@@ -43,9 +43,9 @@ def execute_sql(sql, **kwargs):
     while executing:
         time.sleep(0.5)
     executing = True
-    log.info('executing:\n'+sql)
-    log.info('parameters:')
-    log.info(kwargs)
+    log.debug('executing:\n'+sql)
+    log.debug('parameters:')
+    log.debug(kwargs)
     cursor = db.cursor()
     cursor.execute(sql, kwargs)
     db.commit()
