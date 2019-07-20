@@ -45,9 +45,10 @@ def logout():
         users.setLoginStatus(session['username'], False)
     return redirect('/')
 
+
 BASIC_ACTIONS = [
     ['home', ['/page/index', '主页']],
-    ['optimize',['/page/optimize', '识别优化']],
+    ['optimize', ['/page/optimize', '识别优化']],
     ['login', ['/page/login', '登陆']],
     ['register', ['/page/register', '注册']]
 ]
@@ -232,6 +233,17 @@ def submit():
         return 'unexpected action'
 
 
+# user functions
+@api.route('/request', methods=['POST'])
+def _request():
+    return 'not implemented'
+
+
+@api.route('/request/approve/<id:int>')
+def approve(id):
+    return 'not implemented'
+
+
 # 初始化数据库
 @api.route('/db_init', methods=['GET'])
 def db_init():
@@ -245,6 +257,14 @@ def db_init():
             sign_val float,\
             role text\
         );",
+        "CREATE TABLE requests (\
+            id int primary key auto_increment,\
+            submit_username varchar(50) NOT NULL,\
+            approve_username varchar(50) NOT NULL,\
+            sign_path varchar(50) NOT NULL,\
+            request_info text,\
+            approved_date text\
+        );",  # info is json with keys: name(str), tel(str), start_date(str), end_date(str), reason(str)
         "INSERT INTO user (username,password) VALUES ('admin','admin');"
     ]
     for i in init_sqls:
