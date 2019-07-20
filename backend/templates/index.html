@@ -1,4 +1,8 @@
 <!DOCTYPE html>
 <html>
-<h1>You Are {{ role }}</h1>
+    {% if logged_in %}
+    <h4>You've successfully logged in as a {{ role }}</h4>
+    {% else %}
+    <h4>Please login or sign up for an account</h4>
+    {% endif %}
 </html>

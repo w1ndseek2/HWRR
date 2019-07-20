@@ -19,38 +19,23 @@ page = Blueprint('page', __name__)
 def getPageRoute(page):
     if 'id' not in session.keys():
         session['id'] = os.urandom(32)
-    role = getInfo(session['username'])['role']\
-        if 'username' in session.keys() else 'unknown'
-    return getPage(page, role)
+    info = getInfo(session['username']) if 'username' in session.keys() else {
+        'logged_in': False,
+        'role': 'unknown'
+    }
+    return getPage(page, info)
 
 
-FIELDS = [{
-    'name': 'username',
-    'type': 'text',
-    'placeholder': 'username/ student ID/ teacher ID'
-}, {
-    'name': 'password',
-    'type': 'password',
-    'placeholder': 'input password'
-}, {
-    'name': 'role',
-    'type': 'text',
-    'placeholder': 'input "student" or "teacher"'
-}]
-
-
-def getPage(page, role):
+def getPage(page, info):
+    title = page.capitalize()
+    action = f'/api/{page}'
     if page in ['index', 'home', 'main']:
         page = 'index'
-        return render_template('index.html', **{"role": role})
-    elif page in ['login', 'register', 'optimize']:
-        title = page.capitalize()
-        action = f'/api/{page}'
-        return render_template('form.html', **{
-            'title': title,
-            'action': action,
-            'fields': FIELDS[:1] if page == 'login' else FIELDS if page == 'register' else FIELDS[:2]
-        })
+        return render_template('index.html', **{"role": info['role'], 'logged_in': info['logged_in']})
+    elif page in ['login', 'register'] and info['logged_in']:
+        return redirect('/page/index')
+    elif page in ['login', 'register', 'optimize', 'request']:
+        return redirect(f'/{page}.html')
     elif os.path.exists(f'templates/{page}.html'):
         return render_template(page + '.html')
     else:

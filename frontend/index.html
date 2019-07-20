@@ -52,20 +52,23 @@
             
           </p>
           <script>
-            $.ajax({
-              type: 'GET',
-              url: '/api/show_info',
-              complete: function (a) {
-                var json = JSON.parse(a.responseText)
-                document.querySelector('#user_role').innerHTML = json['role']
-                if(json['logged_in']){
-                  var logout_link = document.createElement('a')
-                  logout_link.setAttribute('href', 'api/logout')
-                  logout_link.innerText = '注销'
-                  document.querySelector('#sidebar').appendChild(logout_link)
+            function addLogoutButton() {
+              $.ajax({
+                type: 'GET',
+                url: '/api/show_info',
+                complete: function (a) {
+                  var json = JSON.parse(a.responseText)
+                  document.querySelector('#user_role').innerHTML = json['role']
+                  if(json['logged_in']){
+                    var logout_link = document.createElement('a')
+                    logout_link.setAttribute('href', 'api/logout')
+                    logout_link.innerText = '注销'
+                    document.querySelector('#sidebar').appendChild(logout_link)
+                  }
                 }
-              }
-            })
+              })
+            }
+            addLogoutButton()
           </script>
         </div>
       </div>
@@ -73,45 +76,44 @@
   </div>
 </body>
 <script>
-  const buttons = new Map([
-    ['home', ['/page/home', '主页']],
-    ['login', ['/page/login', '登陆']],
-    ['register', ['/page/register', '注册']],
-    ['optimize', ['/page/optimize', '识别优化']]
-  ])
+  const buttons = new Map()
   const frame = document.getElementById('bdIframe')
-  $.ajax({
-    method: 'GET',
-    url: '/api/actions',
-    complete: function(a) {
-      var res = JSON.parse(a.responseText)
-      if (res != null)
-        for(const i of res)
-          buttons.set(i[0], i[1])
-    }
-  }).then(function(){
-    const menuList = document.querySelector('ul.navbar-nav')
-    buttons.forEach(function(val, i){
-      var entry = document.createElement('li')
-      var element = document.createElement('a')
-      element.setAttribute('id', i)
-      element.setAttribute('class', 'nav-link')
-      element.setAttribute('href', '#')
-      element.innerText = val[1]
-      element.onclick = function (x) {
-        clearActive()
-        this.parentElement.classList.add('active')
-        frame.src = val[0];
+  const menuList = document.querySelector('ul.navbar-nav')
+  function updateButtons() {
+    $.ajax({
+      method: 'GET',
+      url: '/api/actions',
+      complete: function(a) {
+        buttons.clear()
+        while (menuList.firstChild)
+          menuList.removeChild(menuList.firstChild);
+        var res = JSON.parse(a.responseText)
+        if (res != null)
+          for(const i of res)
+            buttons.set(i[0], i[1])
       }
-      entry.appendChild(element)
-      menuList.appendChild(entry)
-    })
-  })
-  function clearActive() {
-    buttons.forEach(function (val, i) {
-      document.querySelector('#'+i).parentElement.classList.remove('active')
+    }).then(function(){
+      buttons.forEach(function(val, i){
+        var entry = document.createElement('li')
+        var element = document.createElement('a')
+        element.setAttribute('id', i)
+        element.setAttribute('class', 'nav-link')
+        element.setAttribute('href', '#')
+        element.innerText = val[1]
+        element.onclick = function (x) {
+          buttons.forEach(function (val, i) {
+            document.querySelector('#'+i).parentElement.classList.remove('active')
+          })
+          this.parentElement.classList.add('active')
+          frame.src = val[0];
+          updateButtons()
+        }
+        entry.appendChild(element)
+        menuList.appendChild(entry)
+      })
     })
   }
+  updateButtons()
 </script>
 
 </html>

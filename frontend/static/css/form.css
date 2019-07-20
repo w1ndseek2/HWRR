@@ -32,7 +32,7 @@ body {
     margin: 32px auto;
     line-height: 16px;
     border: 1px solid #bbb;
-    width: 65%;
+    width: 75%;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     -ms-border-radius: 5px;
@@ -52,9 +52,6 @@ body {
     letter-spacing: 2px;
     color: #666666;
     background-color: #FFFFFF;
-}
-.container input:focus {
-    width: 70%;
 }
 .container input[type='submit']:hover {
     cursor: pointer;

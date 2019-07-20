@@ -45,20 +45,28 @@ def logout():
         users.setLoginStatus(session['username'], False)
     return redirect('/')
 
-
+BASIC_ACTIONS = [
+    ['home', ['/page/index', '主页']],
+    ['optimize',['/page/optimize', '识别优化']],
+    ['login', ['/page/login', '登陆']],
+    ['register', ['/page/register', '注册']]
+]
 @api.route('/actions')
 def actions():
+    global BASIC_ACTIONS
     if 'username' not in session.keys():
         return '[]'
     print(session['username'])
     res = users.getInfo(session['username'])
+    print(res['logged_in'])
     if res['logged_in']:
+        BA = BASIC_ACTIONS[:2]
         if res['role'] == 'teacher':
-            return json.dumps([['review', ['/page/review', '批阅假条']]])
+            return json.dumps(BA+[['review', ['/page/review', '批阅假条']]])
         else:
-            return json.dumps([['request', ['/page/request', '请假']]])
+            return json.dumps(BA+[['request', ['/page/request', '请假']]])
     else:
-        return '[]'
+        return json.dumps(BASIC_ACTIONS)
 
 
 @api.route('/register', methods=['POST'])
