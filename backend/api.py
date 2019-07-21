@@ -6,29 +6,44 @@ from flask import (
 )
 
 import DynamicProcess
-
-try:
-    import backend.users
-    from backend.utils import (
-        getLoggger,
-        merge_data,
-        verify,
-        execute_sql,
-        cache
-    )
-except:
-    import users
-    from utils import (
-        getLoggger,
-        merge_data,
-        verify,
-        execute_sql,
-        cache
-    )
+import users
+from utils import (
+    getLoggger,
+    merge_data,
+    verify,
+    execute_sql,
+    cache
+)
 
 api = Blueprint('api', __name__)
 api.secret_key = 'seasdf'
 log = getLoggger()
+
+
+def requireLogin(func):
+    def checkLogin():
+        if 'username' not in session.keys() or not users.isLoggedIn(session['username']):
+            return render_template('error.html', messages=['请先登陆', 'Please login'])
+        return func()
+    return checkLogin
+
+
+def requireRole(role):
+    def factory(func):
+        def checkRole():
+            this_role = execute_sql(
+                "SELECT role FROM user WHERE username=%(username)s",
+                username=session['username']
+            )[0]
+            if this_role != role:
+                return render_template('error.html', messages=[
+                    f'只有身份为{role}的用户可以进行此操作',
+                    f'You must be {role} to perform such operations'
+                ])
+            else:
+                return func()
+        return checkRole
+    return factory
 
 
 @api.route('/show_info')
@@ -56,16 +71,15 @@ BASIC_ACTIONS = [
 def actions():
     global BASIC_ACTIONS
     if 'username' not in session.keys():
-        return '[]'
-    print(session['username'])
+        return json.dumps(BASIC_ACTIONS)
     res = users.getInfo(session['username'])
-    print(res['logged_in'])
     if res['logged_in']:
         BA = BASIC_ACTIONS[:2]
         if res['role'] == 'teacher':
-            return json.dumps(BA+[['review', ['/page/review', '批阅假条']]])
+            BA += [['review', ['/page/review', '批阅假条']]]
         else:
-            return json.dumps(BA+[['request', ['/page/request', '请假']]])
+            BA += [['request', ['/page/request', '请假']]]
+        return json.dumps(BA + [['logout', ['/api/logout', '注销']]])
     else:
         return json.dumps(BASIC_ACTIONS)
 
@@ -160,10 +174,6 @@ def login(_data):
         json.loads(true_data[0]), float(true_data[1]),
         _data, limit=0.6
     )
-    role = execute_sql(
-        "SELECT role FROM user WHERE username=%(username)s",
-        username=session['username']
-    )[0]
     if result:
         execute_sql(
             'UPDATE user SET sign_val=%(sign_v)s WHERE username=%(username)s',
@@ -176,6 +186,7 @@ def login(_data):
 
 
 @api.route('/optimize', methods=['POST'])
+@requireLogin
 def pre_optimize():
     username = request.form['username']
     password = request.form['password']
@@ -213,9 +224,8 @@ def optimize(_data):
 
 
 @api.route('/submit', methods=['POST'])
+@requireLogin
 def submit():
-    if 'username' not in session.keys():
-        return 'illegal request'
     data = json.loads(request.get_data())
     _data = []
     for i in data:
@@ -234,12 +244,27 @@ def submit():
 
 
 # user functions
-@api.route('/request', methods=['POST'])
+@api.route('/request/add', methods=['POST'])
+@requireLogin
+@requireRole('student')
 def _request():
     return 'not implemented'
 
 
-@api.route('/request/approve/<id:int>')
+@api.route('/request/list')
+@requireRole('teacher')
+def list_request():
+    return '[]'
+
+
+@api.route('/request/get/<id>')
+@requireRole('teacher')
+def get_request(id):
+    return ''
+
+
+@api.route('/request/approve/<id>')
+@requireRole('teacher')
 def approve(id):
     return 'not implemented'
 

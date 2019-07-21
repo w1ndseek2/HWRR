@@ -37,7 +37,10 @@ def get_secret_key():
     cache.set('secret_key', secret_key)
     return secret_key
 
+
 executing = False
+
+
 def execute_sql(sql, **kwargs):
     global executing
     while executing:

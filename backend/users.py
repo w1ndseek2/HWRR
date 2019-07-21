@@ -1,10 +1,7 @@
-try:
-    from backend.utils import execute_sql, cache
-
-except:
-    from utils import execute_sql, cache
+from utils import execute_sql, cache
 from flask import session
 import json
+
 
 def isLoggedIn(username):
     if not cache.exists(username+".logged_in"):
