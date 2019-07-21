@@ -10,20 +10,20 @@
     <div class="wrap">
         <div class="container">
             <h1>Request</h1>
-            <form action="/api/request" method="POST">
+            <form action="/api/request/add" method="POST">
                 <input type="text" placeholder="姓名">
                 <input type="text" placeholder="电话">
                 <input
                     name="start_date"
-                    type="text" onfocus="(this.type='date')" onblur="(this.type='text')"
+                    type="text" onfocus="(this.type='date')"
                     placeholder="起始日期"
                 >
                 <input
                     name="end_date"
-                    type="text" onfocus="(this.type='date')" onblur="(this.type='text')"
+                    type="text" onfocus="(this.type='date')"
                     placeholder="截止日期"
                 >
-                <input type="text" placeholder="请假理由">
+                <textarea name="reason" rows="3" placeholder="请假理由"></textarea>
                 <input type="submit" value="提交假条"/>
             </form>
         </div>
