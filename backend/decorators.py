@@ -10,7 +10,8 @@ def api_response(func):
     @functools.wraps(func)
     def _api_response(*args, **kwargs):
         result = {}
-        result['status'], result['message'], result['content'] = func(*args, **kwargs)
+        result['status'], result['message'], result['content'] = func(
+            *args, **kwargs)
         return json.dumps(result), 200, {'Content-Type': 'application/json;'}
     return _api_response
 
@@ -43,19 +44,15 @@ def requireRole(role):
     return factory
 
 
-locks = {}
-
-
 def sync(id):
     def factory(func):
         @functools.wraps(func)
         def _sync(*args, **kwargs):
-            global locks
-            while id in locks.keys() and locks[id]:
+            while utils.cache.exists(id) and utils.cache.get(id) == 'true':
                 time.sleep(0.2)
-            locks[id] = True
+            utils.cache.set(id, 'true')
             ret = func(*args, **kwargs)
-            locks[id] = False
+            utils.cache.set(id, 'false')
             return ret
         return _sync
     return factory
