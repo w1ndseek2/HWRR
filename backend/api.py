@@ -258,7 +258,7 @@ def query():
         user=session['username']
     )
     if not res:
-        return 1, 'there are no records', None
+        return 1, 'no record', None
     res = [{
         'id': i[0],
         'submit_date': i[1],
