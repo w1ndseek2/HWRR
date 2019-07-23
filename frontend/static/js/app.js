@@ -74,14 +74,11 @@ savePNGButton.addEventListener("click", function (event) {
     download(dataURL, "signature.png");
   }
 });
-console.log(clearButton.click);
 returnDataButton.addEventListener("click", function (event) {
   if (signaturePad.isEmpty()) {
     alert("Please provide a signature first.");
   } else {
     var dataURL = signaturePad.toData();
-    var datas = JSON.stringify(dataURL);
-    console.log(datas);
     $.ajax({
       type: 'POST',
       url: '/api/submit',
@@ -90,26 +87,29 @@ returnDataButton.addEventListener("click", function (event) {
       contentType: 'application/json',
       complete: function (a) {
         if (a.status === 200) {
-          console.log(a.responseText)
           var json = JSON.parse(a.responseText)
           if (json['status'] != 0) {
             console.log(json['message'])
             window.location.href = "/page/error";
           }
           json = json['content']
-          if (a.responseText == 'True' || a.responseText == 'False') {
-            if (a.responseText == 'True') location.href = '/page/index';
-            else document.body.innerText = '登陆失败';
-          }
-          else if (a.responseText == 'success' || a.responseText == 'failure') {
-            console.log(a.responseText);
-            clearButton.click();
-          }
-          else if (a.responseText == 'ret') {
-            window.location.href = "/page/success";
-          }
-          else if (a.responseText == 'continue') {
-            clearButton.click();
+          switch(json['action']){
+            case 'register':
+              if(json['finished']) location.href = "/page/success"
+              else clearButton.click()
+              break
+            case 'login':
+              if (json['result']) location.href = "/page/index"
+              else {
+                alert('登陆失败')
+                location.href = "/page/login"
+              }
+              break
+            case 'optimize':
+              console.log(json['result'])
+              break
+            default:
+              location.href = "/page/error"
           }
         } else {
           window.location.href = "/page/error";

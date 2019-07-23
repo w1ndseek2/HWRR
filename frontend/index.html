@@ -51,26 +51,6 @@
           <p id=user_role style="font-size: medium">
             
           </p>
-          <script>
-            function addLogoutButton() {
-              $.ajax({
-                type: 'GET',
-                url: '/api/info',
-                complete: function (a) {
-                  var json = JSON.parse(a.responseText)
-                  json = json['content']
-                  document.querySelector('#user_role').innerHTML = json['role']
-                  if(json['logged_in']){
-                    var logout_link = document.createElement('a')
-                    logout_link.setAttribute('href', 'api/logout')
-                    logout_link.innerText = '注销'
-                    document.querySelector('#sidebar').appendChild(logout_link)
-                  }
-                }
-              })
-            }
-            addLogoutButton()
-          </script>
         </div>
       </div>
     </div>

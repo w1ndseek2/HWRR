@@ -1,4 +1,5 @@
 import json
+import time
 from flask import (
     Blueprint, session,
     request, redirect,
@@ -12,6 +13,7 @@ from utils import (
     merge_data,
     verify,
     execute_sql,
+    execute_sql_fetch_all,
     cache
 )
 
@@ -211,11 +213,11 @@ def submit():
     action = session['action']
     session.pop('action')
     if action == 'login':
-        return login(_data)
+        return 0, 'success', login(_data)
     elif action == 'register':
         return 0, 'success', register(_data)
     elif action == 'optimize':
-        return optimize(_data)
+        return 0, 'success', optimize(_data)
     else:
         return 1, 'unexpected action', None
 
@@ -225,32 +227,87 @@ def submit():
 @decorators.requireLogin
 @decorators.requireRole('student')
 def _request():
-    return 'not implemented'
+    info = dict(request.form)
+    for i in info.keys():
+        if i not in ['name', 'tel', 'start_date', 'end_date', 'reason']:
+            info.pop(i)
+    try:
+        execute_sql(
+            "INSERT INTO requests (submit_username, request_info) values (\
+                %(username)s, %(info)s \
+            )",
+            username=session['username'],
+            info=json.dumps(info)
+        )
+    except Exception as e:
+        raise e
+    return render_template('success.html')
 
 
 @api.route('/request/list')
 @decorators.requireRole('teacher')
+@decorators.api_response
 def list_request():
-    return '[]'
+    res = execute_sql_fetch_all(
+        "SELECT id, submit_username FROM requests WHERE handled=false"
+    )
+    res = [{'id':i[0], 'username': i[1]} for i in res]
+    return 0, 'success', res
 
 
-@api.route('/request/get/<id>')
+@api.route('/request/get/<int:id>')
 @decorators.requireRole('teacher')
+@decorators.api_response
 def get_request(id):
-    return ''
+    res = execute_sql(
+        "SELECT request_info FROM requests WHERE id=%(id)s",
+        id=id
+    )
+    if res and len(res)>0:
+        return 0, 'success', json.loads(res[0])
+    else:
+        return 1, 'id doesn\'t exist', None
 
 
 @api.route('/request/approve/<id>')
 @decorators.requireRole('teacher')
+@decorators.api_response
 def approve(id):
-    return 'not implemented'
+    execute_sql(
+        "UPDATE requests SET \
+            approved=true,\
+            handled=true,\
+            approved_date=%(date)s,\
+            approve_username=%(username)s\
+        WHERE id=%(id)s",
+        date=time.asctime(),
+        username=session['username'],
+        id=id
+    )
+    return 0, 'success', None
 
+@api.route('/request/disapprove/<id>')
+@decorators.requireRole('teacher')
+@decorators.api_response
+def disapprove(id):
+    execute_sql(
+        "UPDATE requests SET \
+            approved=false,\
+            handled=true,\
+            handled_date=%(date)s,\
+            handle_username=%(username)s\
+        WHERE id=%(id)s",
+        date=time.asctime(),
+        username=session['username'],
+        id=id
+    )
+    return 0, 'success', None
 
 # 初始化数据库
 @api.route('/db_init', methods=['GET'])
 def db_init():
     init_sqls = [
-        "DROP TABLE IF EXISTS user",
+        "DROP TABLE IF EXISTS user, requests",
         "CREATE TABLE user (\
             id int primary key auto_increment,\
             username varchar(50) NOT NULL,\
@@ -261,11 +318,13 @@ def db_init():
         );",
         "CREATE TABLE requests (\
             id int primary key auto_increment,\
+            handled boolean default false,\
+            approved boolean default false,\
             submit_username varchar(50) NOT NULL,\
-            approve_username varchar(50) NOT NULL,\
-            sign_path varchar(50) NOT NULL,\
+            handle_username varchar(50),\
+            sign_path varchar(50),\
             request_info text,\
-            approved_date text\
+            handled_date text\
         );",  # info is json with keys: name(str), tel(str), start_date(str), end_date(str), reason(str)
         "INSERT INTO user (username,password) VALUES ('admin','admin');"
     ]

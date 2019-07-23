@@ -1,6 +1,5 @@
 from utils import execute_sql, cache
 from flask import session, render_template
-import functools
 import json
 
 

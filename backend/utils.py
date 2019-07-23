@@ -4,7 +4,7 @@ import pymysql
 from redis import Redis
 import os
 import time
-import functools
+import decorators
 
 
 def getLoggger(__name__=__name__, level='INFO'):
@@ -39,14 +39,8 @@ def get_secret_key():
     return secret_key
 
 
-executing = False
-
-
+@decorators.sync('sql')
 def execute_sql(sql, **kwargs):
-    global executing
-    while executing:
-        time.sleep(0.5)
-    executing = True
     log.debug('executing:\n'+sql)
     log.debug('parameters:')
     log.debug(kwargs)
@@ -54,8 +48,18 @@ def execute_sql(sql, **kwargs):
     cursor.execute(sql, kwargs)
     db.commit()
     x = cursor.fetchall()
-    executing = False
     return x[0] if x else None
+
+@decorators.sync('sql')
+def execute_sql_fetch_all(sql, **kwargs):
+    log.debug('executing:\n'+sql)
+    log.debug('parameters:')
+    log.debug(kwargs)
+    cursor = db.cursor()
+    cursor.execute(sql, kwargs)
+    db.commit()
+    x = cursor.fetchall()
+    return x or None
 
 
 def merge_data(data):

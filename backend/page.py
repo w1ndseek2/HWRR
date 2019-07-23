@@ -28,7 +28,7 @@ def getPage(page, info):
         return render_template('index.html', **{"role": info['role'], 'logged_in': info['logged_in']})
     elif info['logged_in'] and page in ['login', 'register']:
         return redirect('/page/index')
-    elif page in ['login', 'register', 'optimize', 'request', 'logout']:
+    elif page in ['login', 'register', 'optimize', 'request', 'logout', 'review']:
         return redirect(f'/{page}.html')
     elif os.path.exists(f'templates/{page}.html'):
         return render_template(page + '.html')

@@ -5,8 +5,6 @@
     $.ajax({
         type: 'GET',
         url: '/api/logout'
-    })
-    location.href = "/page/index"
-    console.log(1)
+    }).then(() => location.href = "/page/index")
 </script>
 </html>
