@@ -4,6 +4,7 @@ import pymysql
 from redis import Redis
 import os
 import time
+import functools
 
 
 def getLoggger(__name__=__name__, level='INFO'):

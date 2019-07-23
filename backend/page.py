@@ -6,11 +6,7 @@ from flask import (
     request, redirect
 )
 from users import getInfo
-
-try:
-    from backend.utils import cache
-except ImportError:
-    from utils import cache
+from utils import cache
 
 page = Blueprint('page', __name__)
 
@@ -27,14 +23,12 @@ def getPageRoute(page):
 
 
 def getPage(page, info):
-    title = page.capitalize()
-    action = f'/api/{page}'
     if page in ['index', 'home', 'main']:
         page = 'index'
         return render_template('index.html', **{"role": info['role'], 'logged_in': info['logged_in']})
-    elif page in ['login', 'register'] and info['logged_in']:
+    elif info['logged_in'] and page in ['login', 'register']:
         return redirect('/page/index')
-    elif page in ['login', 'register', 'optimize', 'request']:
+    elif page in ['login', 'register', 'optimize', 'request', 'logout']:
         return redirect(f'/{page}.html')
     elif os.path.exists(f'templates/{page}.html'):
         return render_template(page + '.html')

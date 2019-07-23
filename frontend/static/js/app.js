@@ -91,6 +91,12 @@ returnDataButton.addEventListener("click", function (event) {
       complete: function (a) {
         if (a.status === 200) {
           console.log(a.responseText)
+          var json = JSON.parse(a.responseText)
+          if (json['status'] != 0) {
+            console.log(json['message'])
+            window.location.href = "/page/error";
+          }
+          json = json['content']
           if (a.responseText == 'True' || a.responseText == 'False') {
             if (a.responseText == 'True') location.href = '/page/index';
             else document.body.innerText = '登陆失败';

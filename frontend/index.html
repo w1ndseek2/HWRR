@@ -55,9 +55,10 @@
             function addLogoutButton() {
               $.ajax({
                 type: 'GET',
-                url: '/api/show_info',
+                url: '/api/info',
                 complete: function (a) {
                   var json = JSON.parse(a.responseText)
+                  json = json['content']
                   document.querySelector('#user_role').innerHTML = json['role']
                   if(json['logged_in']){
                     var logout_link = document.createElement('a')
@@ -87,7 +88,7 @@
         buttons.clear()
         while (menuList.firstChild)
           menuList.removeChild(menuList.firstChild);
-        var res = JSON.parse(a.responseText)
+        var res = JSON.parse(a.responseText)['content']
         if (res != null)
           for(const i of res)
             buttons.set(i[0], i[1])

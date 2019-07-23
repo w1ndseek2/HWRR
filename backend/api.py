@@ -4,7 +4,7 @@ from flask import (
     request, redirect,
     send_file, render_template
 )
-
+import decorators
 import DynamicProcess
 import users
 from utils import (
@@ -20,45 +20,21 @@ api.secret_key = 'seasdf'
 log = getLoggger()
 
 
-def requireLogin(func):
-    def checkLogin():
-        if 'username' not in session.keys() or not users.isLoggedIn(session['username']):
-            return render_template('error.html', messages=['请先登陆', 'Please login'])
-        return func()
-    return checkLogin
-
-
-def requireRole(role):
-    def factory(func):
-        def checkRole():
-            this_role = execute_sql(
-                "SELECT role FROM user WHERE username=%(username)s",
-                username=session['username']
-            )[0]
-            if this_role != role:
-                return render_template('error.html', messages=[
-                    f'只有身份为{role}的用户可以进行此操作',
-                    f'You must be {role} to perform such operations'
-                ])
-            else:
-                return func()
-        return checkRole
-    return factory
-
-
-@api.route('/show_info')
+@api.route('/info')
+@decorators.api_response
 def ses():
     info = {'role': 'unknown'}
     if 'username' in session.keys():
         info = users.getInfo(session['username'])
-    return json.dumps(info)
+    return 0, 'success', info
 
 
 @api.route('/logout')
+@decorators.api_response
 def logout():
     if 'username' in session.keys():
         users.setLoginStatus(session['username'], False)
-    return redirect('/')
+    return 0, 'success', None
 
 
 BASIC_ACTIONS = [
@@ -68,10 +44,11 @@ BASIC_ACTIONS = [
     ['register', ['/page/register', '注册']]
 ]
 @api.route('/actions')
+@decorators.api_response
 def actions():
     global BASIC_ACTIONS
     if 'username' not in session.keys():
-        return json.dumps(BASIC_ACTIONS)
+        return 0, 'success', BASIC_ACTIONS
     res = users.getInfo(session['username'])
     if res['logged_in']:
         BA = BASIC_ACTIONS[:2]
@@ -79,9 +56,9 @@ def actions():
             BA += [['review', ['/page/review', '批阅假条']]]
         else:
             BA += [['request', ['/page/request', '请假']]]
-        return json.dumps(BA + [['logout', ['/api/logout', '注销']]])
+        return 0, 'success', BA + [['logout', ['/page/logout', '注销']]]
     else:
-        return json.dumps(BASIC_ACTIONS)
+        return 0, 'success', BASIC_ACTIONS
 
 
 @api.route('/register', methods=['POST'])
@@ -145,8 +122,8 @@ def register(_data):
         session.pop('username')
         session.pop('password')
         session.pop('role')
-        return 'ret'
-    return 'continue'
+        return {'action': 'register', 'finished': True}
+    return {'action': 'register', 'finished': False}
 
 
 # 登陆
@@ -182,11 +159,11 @@ def login(_data):
         )
         users.setLoginStatus(session['username'], True)
         # 一小时内免登录
-    return str(result)
+    return {'action': 'login', 'result': result}
 
 
 @api.route('/optimize', methods=['POST'])
-@requireLogin
+@decorators.requireLogin
 def pre_optimize():
     username = request.form['username']
     password = request.form['password']
@@ -219,12 +196,12 @@ def optimize(_data):
             sign_v=new_prepared,
             username=session['username']
         )
-        return 'success'
-    return 'failure'
+        return {'action': 'optimize', 'result': True}
+    return {'action': 'optimize', 'result': False}
 
 
 @api.route('/submit', methods=['POST'])
-@requireLogin
+@decorators.api_response
 def submit():
     data = json.loads(request.get_data())
     _data = []
@@ -236,35 +213,35 @@ def submit():
     if action == 'login':
         return login(_data)
     elif action == 'register':
-        return register(_data)
+        return 0, 'success', register(_data)
     elif action == 'optimize':
         return optimize(_data)
     else:
-        return 'unexpected action'
+        return 1, 'unexpected action', None
 
 
 # user functions
 @api.route('/request/add', methods=['POST'])
-@requireLogin
-@requireRole('student')
+@decorators.requireLogin
+@decorators.requireRole('student')
 def _request():
     return 'not implemented'
 
 
 @api.route('/request/list')
-@requireRole('teacher')
+@decorators.requireRole('teacher')
 def list_request():
     return '[]'
 
 
 @api.route('/request/get/<id>')
-@requireRole('teacher')
+@decorators.requireRole('teacher')
 def get_request(id):
     return ''
 
 
 @api.route('/request/approve/<id>')
-@requireRole('teacher')
+@decorators.requireRole('teacher')
 def approve(id):
     return 'not implemented'
 
