@@ -7,14 +7,17 @@ from flask import (
 )
 from users import getInfo
 from utils import cache
+import decorators
 
 page = Blueprint('page', __name__)
 
 
 @page.route('/request/<action>')
+@decorators.requireLogin
 def _request(action):
+    role = getInfo(session['username'])['role']
     if os.path.exists(f'templates/request/{action}.html'):
-        return render_template(f'request/{action}.html')
+        return render_template(f'request/{action}.html', role=role)
     else:
         response = make_response(render_template('404.html'))
         response.status_code = 404

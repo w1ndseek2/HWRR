@@ -59,7 +59,7 @@ def actions():
         else:
             BA += [
                 ['request', ['/page/request/add', '请假']],
-                ['query', ['page/query', '结果查询']]
+                ['query', ['page/request/list', '结果查询']]
             ]
         return 0, 'success', BA + [['logout', ['/page/logout', '注销']]]
     else:
@@ -248,29 +248,66 @@ def _request():
     return render_template('success.html')
 
 
-@api.route('/request/list')
-@decorators.api_response
+@api.route('/request/query')
 @decorators.requireLogin
-@decorators.requireRole('teacher', api=True)
-def list_request():
+@decorators.api_response
+@decorators.requireRole('student', api=True)
+def query():
     res = execute_sql_fetch_all(
-        "SELECT id, submit_username, submitted_date FROM requests WHERE handled=false"
+        "SELECT id, submitted_date, handled, approved FROM requests WHERE submit_username=%(user)s",
+        user=session['username']
     )
     if not res:
         return 1, 'there are no records', None
-    res = [{'id': i[0], 'username': i[1], 'date': i[2]} for i in res]
+    res = [{
+        'id': i[0],
+        'submit_date': i[1],
+        'handled': i[2],
+        'approved':i[3]
+    } for i in res]
+    return 0, 'success', res
+
+
+@api.route('/request/list')
+@decorators.requireLogin
+@decorators.api_response
+def list_request():
+    this_role = users.getInfo(session['username'])['role']
+    if this_role == 'teacher':
+        res = execute_sql_fetch_all(
+            "SELECT id, submit_username, submitted_date FROM requests WHERE handled=false"
+        )
+    elif this_role == 'student':
+        res = execute_sql_fetch_all(
+            "SELECT id, submitted_date, handled, approved FROM requests WHERE submit_username=%(user)s",
+            user=session['username']
+        )
+    if not res:
+        return 1, 'there are no records', None
+    if this_role == 'teacher':
+        res = [{'id': i[0], 'username': i[1], 'date': i[2]} for i in res]
+    elif this_role == 'student':
+        res = [{
+            'id': i[0],
+            'submit_date': i[1],
+            'handled': i[2],
+            'approved':i[3]
+        } for i in res]
     return 0, 'success', res
 
 
 @api.route('/request/get/<int:id>')
-@decorators.api_response
 @decorators.requireLogin
-@decorators.requireRole('teacher', api=True)
+@decorators.api_response
 def get_request(id):
+    this_role = users.getInfo(session['username'])['role']
     res = execute_sql(
-        "SELECT request_info FROM requests WHERE id=%(id)s",
+        "SELECT request_info, submit_username FROM requests WHERE id=%(id)s",
         id=id
     )
+    if this_role != 'teacher' and res[1] != session['username']:
+        log.warning(f'user {session["username"]} is trying to access {res[1]}\'s record')
+        return 1, 'permission denied', None
     if res and len(res) > 0:
         return 0, 'success', json.loads(res[0])
     else:
@@ -278,8 +315,8 @@ def get_request(id):
 
 
 @api.route('/request/approve/<id>')
-@decorators.api_response
 @decorators.requireLogin
+@decorators.api_response
 @decorators.requireRole('teacher', api=True)
 def approve(id):
     execute_sql(

@@ -35,10 +35,15 @@
 <script>
     const list = document.querySelector("#list")
 
-
     function addRequest(data) {
         var node = document.createElement("a")
+        {% if role == 'teacher' %}
         node.innerText = "用户名: " + data["username"] + "\n时间: " + data["date"]
+        {% else %}
+        var status = '正在审阅'
+        if (data['handled']) status = data['approved'] ? '批准' : '拒绝'
+        node.innerText = "时间: " + data['submit_date'] + '\n状态: ' + status
+        {% endif %}
         node.classList.add('container')
         node.href = "/page/request/show/" + data["id"]
         list.appendChild(node)

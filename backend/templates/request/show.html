@@ -12,8 +12,10 @@
         <p>请假时间: 从<code id="start_date"></code>到<code id="end_date"></code></p>
         <p>本人电话<code id="tel"></code></p>
     </div>
+    {% if role == 'teacher' %}
     <a href='#' onclick="GET('/api/request/approve/{{ id }}')">同意申请</a>
     <a href='#' onclick="GET('/api/request/disapprove/{{ id }}')">拒绝申请</a>
+    {% endif %}
 </body>
 <script>
     function GET(url) {
