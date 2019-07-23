@@ -2,99 +2,99 @@
 <html lang="zh-CN">
 
 <head>
-  <meta charset="utf-8">
-  <title>表格</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-  <link href="/static/css/layout.css" rel="stylesheet">
-  <link href="/static/css/pure-min.css" rel="stylesheet" type="text/css">
-  <link href="/static/css/grids-responsive-min.css" rel="stylesheet" type="text/css" >
-  <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <meta charset="utf-8">
+    <title>表格</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/layout.css" rel="stylesheet">
+    <link href="/static/css/pure-min.css" rel="stylesheet" type="text/css">
+    <link href="/static/css/grids-responsive-min.css" rel="stylesheet" type="text/css">
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
 </head>
 
 <body>
-  <div class="body">
-    <div id="header">
-      <div class="title">
-        <div id="logo">请假批阅</div>
-        <p class="description">一个简单的介绍</p>
-      </div>
-      <div id="navigation">
-        <nav class="navbar navbar-expand-lg navbar-light">
-          <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
-              <!-- to be injected -->
-            </ul>
-        </nav>
-      </div>
-    </div>
-    <div class="pure-g">
-      <div class="pure-u-1 pure-u-md-3-4">
-        <div class="content">
-          <iframe id="bdIframe" frameborder="0" src="/page/home"></iframe>
-          <script>
-            function resizeIframe() {
-              const oIframe = document.getElementById('bdIframe')
-              const deviceWidth = document.querySelector('.content').clientWidth
-              const deviceHeight = document.documentElement.clientHeight - 140;
-              oIframe.style.width = Number(deviceWidth) + 'px' // 数字是页面布局宽度差值
-              oIframe.style.height = Number(deviceHeight) + 'px' // 数字是页面布局高度差
-            }
-            resizeIframe()
-            window.onresize = this.resizeIframe
-          </script>
+    <div class="body">
+        <div id="header">
+            <div class="title">
+                <div id="logo">请假批阅</div>
+                <p class="description">一个简单的介绍</p>
+            </div>
+            <div id="navigation">
+                <nav class="navbar navbar-expand-lg navbar-light">
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav mr-auto">
+                            <!-- to be injected -->
+                        </ul>
+                </nav>
+            </div>
         </div>
-      </div>
-      <div class="pure-u-1-4 hidden_mid_and_down">
-        <div id="sidebar" class="profile">
-          <p>You Are: </p>
-          <p id=user_role style="font-size: medium">
-            
-          </p>
+        <div class="pure-g">
+            <div class="pure-u-1 pure-u-md-3-4">
+                <div class="content">
+                    <iframe id="bdIframe" frameborder="0" src="/page/home"></iframe>
+                    <script>
+                        function resizeIframe() {
+                            const oIframe = document.getElementById('bdIframe')
+                            const deviceWidth = document.querySelector('.content').clientWidth
+                            const deviceHeight = document.documentElement.clientHeight - 140
+                            oIframe.style.width = Number(deviceWidth) + 'px' // 数字是页面布局宽度差值
+                            oIframe.style.height = Number(deviceHeight) + 'px' // 数字是页面布局高度差
+                        }
+                        resizeIframe()
+                        window.onresize = this.resizeIframe
+                    </script>
+                </div>
+            </div>
+            <div class="pure-u-1-4 hidden_mid_and_down">
+                <div id="sidebar" class="profile">
+                    <p>You Are: </p>
+                    <p id=user_role style="font-size: medium">
+
+                    </p>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </body>
 <script>
-  const buttons = new Map()
-  const frame = document.getElementById('bdIframe')
-  const menuList = document.querySelector('ul.navbar-nav')
-  function updateButtons() {
-    $.ajax({
-      method: 'GET',
-      url: '/api/actions',
-      complete: function(a) {
-        buttons.clear()
-        while (menuList.firstChild)
-          menuList.removeChild(menuList.firstChild);
-        var res = JSON.parse(a.responseText)['content']
-        if (res != null)
-          for(const i of res)
-            buttons.set(i[0], i[1])
-      }
-    }).then(function(){
-      buttons.forEach(function(val, i){
-        var entry = document.createElement('li')
-        var element = document.createElement('a')
-        element.setAttribute('id', i)
-        element.setAttribute('class', 'nav-link')
-        element.setAttribute('href', '#')
-        element.innerText = val[1]
-        element.onclick = function (x) {
-          buttons.forEach(function (val, i) {
-            document.querySelector('#'+i).parentElement.classList.remove('active')
-          })
-          this.parentElement.classList.add('active')
-          frame.src = val[0];
-          updateButtons()
-        }
-        entry.appendChild(element)
-        menuList.appendChild(entry)
-      })
-    })
-  }
-  updateButtons()
+    const buttons = new Map()
+    const frame = document.getElementById('bdIframe')
+    const menuList = document.querySelector('ul.navbar-nav')
+    function updateButtons() {
+        $.ajax({
+            method: 'GET',
+            url: '/api/actions',
+            complete: function (a) {
+                buttons.clear()
+                while (menuList.firstChild)
+                    menuList.removeChild(menuList.firstChild);
+                var res = JSON.parse(a.responseText)['content']
+                if (res != null)
+                    for (const i of res)
+                        buttons.set(i[0], i[1])
+            }
+        }).then(function () {
+            buttons.forEach(function (val, i) {
+                var entry = document.createElement('li')
+                var element = document.createElement('a')
+                element.setAttribute('id', i)
+                element.setAttribute('class', 'nav-link')
+                element.setAttribute('href', '#')
+                element.innerText = val[1]
+                element.onclick = function (x) {
+                    buttons.forEach(function (val, i) {
+                        document.querySelector('#' + i).parentElement.classList.remove('active')
+                    })
+                    this.parentElement.classList.add('active')
+                    frame.src = val[0]
+                    frame.onload = updateButtons
+                }
+                entry.appendChild(element)
+                menuList.appendChild(entry)
+            })
+        })
+    }
+    updateButtons()
 </script>
 
 </html>

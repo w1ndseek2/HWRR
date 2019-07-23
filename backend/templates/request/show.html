@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+</head>
+
+<body>
+    <div class="paper">
+        <h4>尊敬的辅导员:</h4>
+        <p>您好！本人<code id="name"></code>, 因<code id="reason"></code>请假。</p>
+        <p>请假时间: 从<code id="start_date"></code>到<code id="end_date"></code></p>
+        <p>本人电话<code id="tel"></code></p>
+    </div>
+    <a href='#' onclick="GET('/api/request/approve/{{ id }}')">同意申请</a>
+    <a href='#' onclick="GET('/api/request/disapprove/{{ id }}')">拒绝申请</a>
+</body>
+<script>
+    function GET(url) {
+        $.ajax({
+            type: 'GET',
+            url: url,
+            complete: (a) => alert('成功')
+        })
+    }
+    var id = {{ id }}
+    function renderVars(vars) {
+        console.log(vars)
+        for (var i in vars)
+            document.querySelector('#' + i).innerText = vars[i]
+    }
+    $.ajax({
+        type: 'GET',
+        url: '/api/request/get/' + id,
+        complete: function (a) {
+            var json = JSON.parse(a.responseText)
+            if (json['status'] != 0)
+                console.log(json['message'])
+            else renderVars(json['content'])
+        }
+    })
+</script>
+
+</html>

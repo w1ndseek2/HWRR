@@ -55,9 +55,12 @@ def actions():
     if res['logged_in']:
         BA = BASIC_ACTIONS[:2]
         if res['role'] == 'teacher':
-            BA += [['review', ['/page/review', '批阅假条']]]
+            BA += [['review', ['/page/request/list', '批阅假条']]]
         else:
-            BA += [['request', ['/page/request', '请假']]]
+            BA += [
+                ['request', ['/page/request/add', '请假']],
+                ['query', ['page/query', '结果查询']]
+            ]
         return 0, 'success', BA + [['logout', ['/page/logout', '注销']]]
     else:
         return 0, 'success', BASIC_ACTIONS
@@ -233,11 +236,12 @@ def _request():
             info.pop(i)
     try:
         execute_sql(
-            "INSERT INTO requests (submit_username, request_info) values (\
-                %(username)s, %(info)s \
+            "INSERT INTO requests (submit_username, request_info, submitted_date) values (\
+                %(username)s, %(info)s , %(date)s\
             )",
             username=session['username'],
-            info=json.dumps(info)
+            info=json.dumps(info),
+            date=time.asctime()
         )
     except Exception as e:
         raise e
@@ -245,40 +249,45 @@ def _request():
 
 
 @api.route('/request/list')
-@decorators.requireRole('teacher')
 @decorators.api_response
+@decorators.requireLogin
+@decorators.requireRole('teacher', api=True)
 def list_request():
     res = execute_sql_fetch_all(
-        "SELECT id, submit_username FROM requests WHERE handled=false"
+        "SELECT id, submit_username, submitted_date FROM requests WHERE handled=false"
     )
-    res = [{'id':i[0], 'username': i[1]} for i in res]
+    if not res:
+        return 1, 'there are no records', None
+    res = [{'id': i[0], 'username': i[1], 'date': i[2]} for i in res]
     return 0, 'success', res
 
 
 @api.route('/request/get/<int:id>')
-@decorators.requireRole('teacher')
 @decorators.api_response
+@decorators.requireLogin
+@decorators.requireRole('teacher', api=True)
 def get_request(id):
     res = execute_sql(
         "SELECT request_info FROM requests WHERE id=%(id)s",
         id=id
     )
-    if res and len(res)>0:
+    if res and len(res) > 0:
         return 0, 'success', json.loads(res[0])
     else:
         return 1, 'id doesn\'t exist', None
 
 
 @api.route('/request/approve/<id>')
-@decorators.requireRole('teacher')
 @decorators.api_response
+@decorators.requireLogin
+@decorators.requireRole('teacher', api=True)
 def approve(id):
     execute_sql(
         "UPDATE requests SET \
             approved=true,\
             handled=true,\
-            approved_date=%(date)s,\
-            approve_username=%(username)s\
+            handled_date=%(date)s,\
+            handle_username=%(username)s\
         WHERE id=%(id)s",
         date=time.asctime(),
         username=session['username'],
@@ -286,9 +295,11 @@ def approve(id):
     )
     return 0, 'success', None
 
+
 @api.route('/request/disapprove/<id>')
-@decorators.requireRole('teacher')
 @decorators.api_response
+@decorators.requireLogin
+@decorators.requireRole('teacher', api=True)
 def disapprove(id):
     execute_sql(
         "UPDATE requests SET \
@@ -321,10 +332,11 @@ def db_init():
             handled boolean default false,\
             approved boolean default false,\
             submit_username varchar(50) NOT NULL,\
+            submitted_date text,\
             handle_username varchar(50),\
+            handled_date text,\
             sign_path varchar(50),\
-            request_info text,\
-            handled_date text\
+            request_info text\
         );",  # info is json with keys: name(str), tel(str), start_date(str), end_date(str), reason(str)
         "INSERT INTO user (username,password) VALUES ('admin','admin');"
     ]

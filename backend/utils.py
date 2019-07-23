@@ -17,13 +17,12 @@ def getLoggger(__name__=__name__, level='INFO'):
 
 
 pymysql.install_as_MySQLdb()
-conn_args= {
+conn_args = {
     'host': os.getenv('DB_URL') or 'localhost',
     'user': os.getenv('DB_USER') or 'username',
     'passwd': os.getenv('DB_PWD') or 'password',
     'db': os.getenv('DB_NAME') or 'test2'
 }
-db = pymysql.connect(**conn_args)
 cache = Redis(
     host=os.getenv('CACHE_URL') or 'localhost',
     port=int(os.getenv('CACHE_PORT')) if os.getenv('CACHE_PORT') else 6379,
@@ -40,26 +39,8 @@ def get_secret_key():
     return secret_key
 
 
-@decorators.sync('sql')
 def execute_sql(sql, **kwargs):
-    global db
-    log.debug('executing:\n'+sql)
-    log.debug('parameters:')
-    log.debug(kwargs)
-    for i in range(4):
-        try:
-            cursor = db.cursor()
-            cursor.execute(sql, kwargs)
-            db.commit()
-            x = cursor.fetchall()
-            break
-        except pymysql.err.InternalError as e:
-            if i == 3:
-                raise e
-    return x[0] if x else None
-
-@decorators.sync('sql')
-def execute_sql_fetch_all(sql, **kwargs):
+    db = pymysql.connect(**conn_args)
     log.debug('executing:\n'+sql)
     log.debug('parameters:')
     log.debug(kwargs)
@@ -67,6 +48,20 @@ def execute_sql_fetch_all(sql, **kwargs):
     cursor.execute(sql, kwargs)
     db.commit()
     x = cursor.fetchall()
+    db.close()
+    return x[0] if x else None
+
+
+def execute_sql_fetch_all(sql, **kwargs):
+    db = pymysql.connect(**conn_args)
+    log.debug('executing:\n'+sql)
+    log.debug('parameters:')
+    log.debug(kwargs)
+    cursor = db.cursor()
+    cursor.execute(sql, kwargs)
+    db.commit()
+    x = cursor.fetchall()
+    db.close()
     return x or None
 
 

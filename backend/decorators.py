@@ -25,7 +25,7 @@ def requireLogin(func):
     return checkLogin
 
 
-def requireRole(role):
+def requireRole(role, api=False):
     def factory(func):
         @functools.wraps(func)
         def checkRole(*args, **kwargs):
@@ -34,10 +34,13 @@ def requireRole(role):
                 username=session['username']
             )[0]
             if this_role != role:
-                return render_template('error.html', messages=[
-                    f'只有身份为{role}的用户可以进行此操作',
-                    f'You must be {role} to perform such operations'
-                ])
+                if api:
+                    return 0, f'You must be {role} to perform such operations', None
+                else:
+                    return render_template('error.html', messages=[
+                        f'只有身份为{role}的用户可以进行此操作',
+                        f'You must be {role} to perform such operations'
+                    ])
             else:
                 return func(*args, **kwargs)
         return checkRole
@@ -49,7 +52,7 @@ def sync(id):
         @functools.wraps(func)
         def _sync(*args, **kwargs):
             key = 'sync'+id
-            while utils.cache.exists(key) and utils.cache.get(key) == 'true':
+            while utils.cache.exists(key) and utils.cache.get(key).decode() == 'true':
                 time.sleep(0.2)
             utils.cache.set(key, 'true')
             ret = func(*args, **kwargs)

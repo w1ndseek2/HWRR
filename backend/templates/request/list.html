@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <style>
+        .container {
+            width: 50%;
+            display: block;
+            height: 40px;
+            outline: 0;
+            padding: 6px 10px;
+            margin: 32px auto;
+            line-height: 22px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            box-shadow: none;
+            text-align: left;
+            font-size: medium;
+            text-decoration:none;
+            color:#000000;
+        }
+        .container :hover {
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="list">
+        
+    </div>
+</body>
+<script>
+    const list = document.querySelector("#list")
+
+
+    function addRequest(data) {
+        var node = document.createElement("a")
+        node.innerText = "用户名: " + data["username"] + "\n时间: " + data["date"]
+        node.classList.add('container')
+        node.href = "/page/request/show/" + data["id"]
+        list.appendChild(node)
+    }
+    function getRequests() {
+        $.ajax({
+            type: 'GET',
+            url: '/api/request/list',
+            complete: function (a) {
+                var data = JSON.parse(a.responseText)
+                if (data.content !== null) {
+                    data = data.content
+                    for (var i of data)
+                        addRequest(i)
+                }
+                else alert(data['message'])
+            }
+        })
+    }
+    getRequests()
+</script>
+
+</html>
