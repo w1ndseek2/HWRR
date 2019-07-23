@@ -48,11 +48,12 @@ def sync(id):
     def factory(func):
         @functools.wraps(func)
         def _sync(*args, **kwargs):
-            while utils.cache.exists(id) and utils.cache.get(id) == 'true':
+            key = 'sync'+id
+            while utils.cache.exists(key) and utils.cache.get(key) == 'true':
                 time.sleep(0.2)
-            utils.cache.set(id, 'true')
+            utils.cache.set(key, 'true')
             ret = func(*args, **kwargs)
-            utils.cache.set(id, 'false')
+            utils.cache.set(key, 'false')
             return ret
         return _sync
     return factory
