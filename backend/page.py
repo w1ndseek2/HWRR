@@ -26,7 +26,8 @@ def _request(action):
 
 @page.route('/request/show/<int:id>')
 def show_request(id):
-    return render_template('request/show.html', id=id)
+    role = getInfo(session['username'])['role']
+    return render_template('request/show.html', id=id, role=role)
 
 
 @page.route('/<page>')
