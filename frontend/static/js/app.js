@@ -107,6 +107,24 @@ returnDataButton.addEventListener("click", function (event) {
               break
             case 'optimize':
               console.log(json['result'])
+              clearButton.click()
+              break
+            case 'approve':
+              console.log(json['result'])
+              if(json['result']){
+                $.ajax({
+                  type: 'POST',
+                  url: '/api/request/save_signature',
+                  data: {
+                    'data': signaturePad.toDataURL('image/png')
+                  },
+                  complete: function(a) {
+                    alert('成功')
+                    history.back()
+                  }
+                })
+              }
+              else clearButton.click()
               break
             default:
               location.href = "/page/error"

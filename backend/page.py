@@ -6,7 +6,7 @@ from flask import (
     request, redirect
 )
 from users import getInfo
-from utils import cache
+from utils import cache, execute_sql
 import decorators
 
 page = Blueprint('page', __name__)
@@ -27,7 +27,13 @@ def _request(action):
 @page.route('/request/show/<int:id>')
 def show_request(id):
     role = getInfo(session['username'])['role']
-    return render_template('request/show.html', id=id, role=role)
+    res = execute_sql(
+        '''
+        SELECT sign_path FROM requests WHERE id=%(id)s
+        ''',
+        id=id
+    )[0]
+    return render_template('request/show.html', id=id, role=role, data=res)
 
 
 @page.route('/<page>')

@@ -66,6 +66,84 @@ def actions():
         return 0, 'success', BASIC_ACTIONS
 
 
+@api.route('/request/approve/<id>')
+@decorators.requireLogin
+@decorators.requireRole('teacher')
+def pre_approve(id):
+    session['action'] = 'approve'
+    session['id'] = id
+    return redirect('/page/sigpad')
+
+
+def approve(_data):
+    true_data = execute_sql(
+        "SELECT sign_prepared, sign_val FROM user WHERE username=%(username)s",
+        username=session['username']
+    )
+    result, new_prepared = DynamicProcess.match(
+        json.loads(true_data[0]), float(true_data[1]),
+        _data, limit=0.6
+    )
+    if result:
+        execute_sql(
+            'UPDATE user SET sign_val=%(sign_v)s WHERE username=%(username)s',
+            sign_v=new_prepared,
+            username=session['username']
+        )
+        execute_sql(
+            "UPDATE requests SET \
+                approved=true,\
+                handled=true,\
+                handled_date=%(date)s,\
+                handle_username=%(username)s\
+            WHERE id=%(id)s",
+            date=time.asctime(),
+            username=session['username'],
+            id=session['id']
+        )
+    else:
+        session['action'] = 'approve'
+    return {'action': 'approve', 'result': result}
+
+
+@api.route('/request/save_signature', methods=['POST'])
+@decorators.api_response
+@decorators.requireLogin
+@decorators.requireRole('teacher', api=True)
+def save_signature():
+    execute_sql(
+        '''
+        UPDATE requests SET
+            sign_path=%(data)s
+        WHERE id=%(id)s
+        ''',
+        data=request.form['data'],
+        id=session['id']
+    )
+    print(request.form['data'])
+    session.pop('id')
+    return 0, 'success', None
+
+
+@api.route('/request/disapprove/<id>')
+@decorators.api_response
+@decorators.requireLogin
+@decorators.requireRole('teacher', api=True)
+def disapprove(id):
+    execute_sql(
+        "UPDATE requests SET \
+            approved=false,\
+            handled=true,\
+            handled_date=%(date)s,\
+            handle_username=%(username)s\
+        WHERE id=%(id)s",
+        date=time.asctime(),
+        username=session['username'],
+        id=id
+    )
+    return 0, 'success', None
+
+
 @api.route('/register', methods=['POST'])
 def pre_register():
     for i in ['username', 'password', 'role']:
@@ -221,6 +299,8 @@ def submit():
         return 0, 'success', register(_data)
     elif action == 'optimize':
         return 0, 'success', optimize(_data)
+    elif action == 'approve':
+        return 0, 'success', approve(_data)
     else:
         return 1, 'unexpected action', None
 
@@ -306,50 +386,13 @@ def get_request(id):
         id=id
     )
     if this_role != 'teacher' and res[1] != session['username']:
-        log.warning(f'user {session["username"]} is trying to access {res[1]}\'s record')
+        log.warning(
+            f'user {session["username"]} is trying to access {res[1]}\'s record')
         return 1, 'permission denied', None
     if res and len(res) > 0:
         return 0, 'success', json.loads(res[0])
     else:
         return 1, 'id doesn\'t exist', None
-
-
-@api.route('/request/approve/<id>')
-@decorators.requireLogin
-@decorators.api_response
-@decorators.requireRole('teacher', api=True)
-def approve(id):
-    execute_sql(
-        "UPDATE requests SET \
-            approved=true,\
-            handled=true,\
-            handled_date=%(date)s,\
-            handle_username=%(username)s\
-        WHERE id=%(id)s",
-        date=time.asctime(),
-        username=session['username'],
-        id=id
-    )
-    return 0, 'success', None
-
-
-@api.route('/request/disapprove/<id>')
-@decorators.api_response
-@decorators.requireLogin
-@decorators.requireRole('teacher', api=True)
-def disapprove(id):
-    execute_sql(
-        "UPDATE requests SET \
-            approved=false,\
-            handled=true,\
-            handled_date=%(date)s,\
-            handle_username=%(username)s\
-        WHERE id=%(id)s",
-        date=time.asctime(),
-        username=session['username'],
-        id=id
-    )
-    return 0, 'success', None
 
 # 初始化数据库
 @api.route('/db_init', methods=['GET'])
@@ -372,7 +415,7 @@ def db_init():
             submitted_date text,\
             handle_username varchar(50),\
             handled_date text,\
-            sign_path varchar(50),\
+            sign_path text,\
             request_info text\
         );",  # info is json with keys: name(str), tel(str), start_date(str), end_date(str), reason(str)
         "INSERT INTO user (username,password) VALUES ('admin','admin');"

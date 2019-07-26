@@ -13,8 +13,11 @@
         <p>本人电话<code id="tel"></code></p>
     </div>
     {% if role == 'teacher' %}
-    <a href='#' onclick="GET('/api/request/approve/{{ id }}')">同意申请</a>
+    <a href='/api/request/approve/{{ id }}'>同意申请</a>
     <a href='#' onclick="GET('/api/request/disapprove/{{ id }}')">拒绝申请</a>
+    {% else %}
+    <h4>老师签名:</h4>
+    <img src="{{ data }}" style="height: 200px; width:400px">
     {% endif %}
 </body>
 <script>
