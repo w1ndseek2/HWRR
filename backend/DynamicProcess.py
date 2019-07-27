@@ -284,14 +284,17 @@ class DynamicProcess():
 
     @staticmethod
     def pre_value(prl):
-        d_x = []
-        d_y = []
+        ret = []
+        f = lambda d_x, d_y: math.sqrt(np.mean(d_x)**2 + np.mean(d_y)**2)
         for i in range(len(prl)):
+            d_x = []
+            d_y = []
             for j in range(len(prl)):
                 if i != j:
                     d_x.append(DynamicProcess.dtw(prl[i][1], prl[j][1]))
                     d_y.append(DynamicProcess.dtw(prl[i][2], prl[j][2]))
-        return math.sqrt(np.mean(d_x)**2 + np.mean(d_y)**2)
+            ret.append(f(d_x, d_y))
+        return np.mean(ret)
 
 
 def match(preprocessd_real_list, pre_length, compare_list, limit=0.6):
