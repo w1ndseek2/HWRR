@@ -294,7 +294,7 @@ class DynamicProcess():
                     d_x.append(DynamicProcess.dtw(prl[i][1], prl[j][1]))
                     d_y.append(DynamicProcess.dtw(prl[i][2], prl[j][2]))
             ret.append(f(d_x, d_y))
-        return np.mean(ret)
+        return float(np.mean(ret))
 
 
 def match(preprocessd_real_list, pre_length, compare_list, limit=0.6):
