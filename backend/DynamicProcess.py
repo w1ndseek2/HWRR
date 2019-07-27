@@ -289,6 +289,7 @@ class DynamicProcess():
         # limit may be wrong
 
         f = lambda d_x, d_y: math.sqrt(np.mean(d_x)**2 + np.mean(d_y)**2)
+
         _compare = lambda lst, i, j, s: DynamicProcess.dtw(lst[i][s], lst[j][s])
         calc = lambda lst, i, j: f(_compare(lst, i, j, 1), _compare(lst, i, j, 2))
         dist = [calc(prl, 0, 1), calc(prl, 0, 2), calc(prl, 1, 2)]
@@ -297,7 +298,7 @@ class DynamicProcess():
         if s > limit:
             return -1
         else:
-            return np.mean(dist)
+            return float(np.mean(dist))
         # for i in range(len(prl)):
         #     d_x = []
         #     d_y = []
