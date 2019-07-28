@@ -415,7 +415,7 @@ def db_init():
             submitted_date text,\
             handle_username varchar(50),\
             handled_date text,\
-            sign_path text,\
+            sign_path longtext,\
             request_info text\
         );",  # info is json with keys: name(str), tel(str), start_date(str), end_date(str), reason(str)
         "INSERT INTO user (username,password) VALUES ('admin','admin');"
