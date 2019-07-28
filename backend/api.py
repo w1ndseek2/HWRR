@@ -41,7 +41,6 @@ def logout():
 
 BASIC_ACTIONS = [
     ['home', ['/page/index', '主页']],
-    ['optimize', ['/page/optimize', '识别优化']],
     ['login', ['/page/login', '登陆']],
     ['register', ['/page/register', '注册']]
 ]
