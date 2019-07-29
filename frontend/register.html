@@ -13,7 +13,11 @@
             <form action="/api/register" method="POST">
                 <input name="username" type="text" placeholder="username/ student ID/ teacher ID">
                 <input name="password" type="password" placeholder="input password">
-                <input name="role" type="text" placeholder="input &#34;student&#34; or &#34;teacher&#34;">
+                <select name="role">
+                    <option selected value="">select 'student' or 'teacher'</option>
+                    <option value="student">student</option>
+                    <option value="teacher">teacher</option>
+                </select>
                 <input type="submit" value="注册">
             </form>
         </div>

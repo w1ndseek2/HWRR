@@ -146,7 +146,7 @@ def disapprove(id):
 @api.route('/register', methods=['POST'])
 def pre_register():
     for i in ['username', 'password', 'role']:
-        if i not in request.form.keys():
+        if i not in request.form.keys() or request.form[i] is None or len(request.form[i]) == 0:
             return render_template('error.html', messages=['invalid request'])
     username = request.form['username']
     username = username.replace('\"', '')

@@ -24,7 +24,7 @@ body {
     color: #000000;
     font-weight: 500;
 }
-.container input, textarea{
+.container input, textarea, select {
     width: 320px;
     display: block;
     height: 36px;
@@ -43,12 +43,7 @@ body {
     -moz-box-shadow: none;
     box-shadow: none;
 }
-.container input[type="text"] , .container input[type="password"]  {
-    background-color: #FFFFFF;
-    font-size: 16px;
-    color: rgb(71, 71, 71);
-}
-.container textarea {
+.container input[type="text"] , .container input[type="password"], .container textarea, .container select {
     background-color: #FFFFFF;
     font-size: 16px;
     color: rgb(71, 71, 71);
