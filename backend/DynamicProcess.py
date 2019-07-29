@@ -283,7 +283,7 @@ class DynamicProcess():
         return ret_list
 
     @staticmethod
-    def pre_value(prl, limit=0.5):
+    def pre_value(prl, limit=0.8):
 
         # !!!
         # limit may be wrong
@@ -313,8 +313,8 @@ class DynamicProcess():
 
 def match(preprocessd_real_list, pre_length, compare_list, limit=0.6):
     x = DynamicProcess.compare(preprocessd_real_list, compare_list)
-    if limit <= 0:
-        limit = pre_length * 0.15 + 0.45
+#     if limit <= 0:
+    limit = pre_length * 0.15 + 0.45
     res = x * limit
     # maybe should update the pre_value.
     if res < pre_length:

@@ -192,11 +192,11 @@ def register(_data):
         real = DynamicProcess.prepare_list(register_data)
         real_v = DynamicProcess.prepare_value(real)
         
-        if real_v < 0:
-            session.pop('username')
-            session.pop('password')
-            session.pop('role')
-            return {'action': 'register', 'finished': False}
+#         if real_v < 0:
+#             session.pop('username')
+#             session.pop('password')
+#             session.pop('role')
+#             return {'action': 'register', 'finished': False}
 
         execute_sql(
             "INSERT INTO user (username, password, sign_prepared, sign_val, role) values (\
