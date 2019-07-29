@@ -283,7 +283,7 @@ class DynamicProcess():
         return ret_list
 
     @staticmethod
-    def pre_value(prl, limit=1):
+    def pre_value(prl, limit=0.5):
 
         # !!!
         # limit may be wrong
@@ -295,7 +295,8 @@ class DynamicProcess():
         dist = [calc(prl, 0, 1), calc(prl, 0, 2), calc(prl, 1, 2)]
         # standard deviation
         s = np.std(dist)
-        if s > limit:
+        ret = np.mean(dist)
+        if s > limit or ret > 3:
             return -1
         else:
             return float(np.mean(dist))
@@ -312,6 +313,8 @@ class DynamicProcess():
 
 def match(preprocessd_real_list, pre_length, compare_list, limit=0.6):
     x = DynamicProcess.compare(preprocessd_real_list, compare_list)
+    if limit <= 0:
+        limit = pre_length * 0.15 + 0.45
     res = x * limit
     # maybe should update the pre_value.
     if res < pre_length:
