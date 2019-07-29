@@ -191,6 +191,13 @@ def register(_data):
 
         real = DynamicProcess.prepare_list(register_data)
         real_v = DynamicProcess.prepare_value(real)
+        
+        if real_v < 0:
+            session.pop('username')
+            session.pop('password')
+            session.pop('role')
+            return {'action': 'register', 'finished': False}
+
         execute_sql(
             "INSERT INTO user (username, password, sign_prepared, sign_val, role) values (\
                 %(username)s, %(password)s, %(sign_prepared)s, %(sign_val)s, %(role)s \
@@ -231,14 +238,14 @@ def login(_data):
     )
     result, new_prepared = DynamicProcess.match(
         json.loads(true_data[0]), float(true_data[1]),
-        _data, limit=0.6
+        _data, limit=0
     )
     if result:
-        execute_sql(
-            'UPDATE user SET sign_val=%(sign_v)s WHERE username=%(username)s',
-            sign_v=new_prepared,
-            username=session['username']
-        )
+        # execute_sql(
+        #     'UPDATE user SET sign_val=%(sign_v)s WHERE username=%(username)s',
+        #     sign_v=new_prepared,
+        #     username=session['username']
+        # )
         users.setLoginStatus(session['username'], True)
         # 一小时内免登录
     return {'action': 'login', 'result': result}

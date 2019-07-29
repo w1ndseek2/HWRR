@@ -283,19 +283,38 @@ class DynamicProcess():
         return ret_list
 
     @staticmethod
-    def pre_value(prl):
-        d_x = []
-        d_y = []
-        for i in range(len(prl)):
-            for j in range(len(prl)):
-                if i != j:
-                    d_x.append(DynamicProcess.dtw(prl[i][1], prl[j][1]))
-                    d_y.append(DynamicProcess.dtw(prl[i][2], prl[j][2]))
-        return math.sqrt(np.mean(d_x)**2 + np.mean(d_y)**2)
+    def pre_value(prl, limit=0.5):
+
+        # !!!
+        # limit may be wrong
+
+        f = lambda d_x, d_y: math.sqrt(np.mean(d_x)**2 + np.mean(d_y)**2)
+
+        _compare = lambda lst, i, j, s: DynamicProcess.dtw(lst[i][s], lst[j][s])
+        calc = lambda lst, i, j: f(_compare(lst, i, j, 1), _compare(lst, i, j, 2))
+        dist = [calc(prl, 0, 1), calc(prl, 0, 2), calc(prl, 1, 2)]
+        # standard deviation
+        s = np.std(dist)
+        ret = np.mean(dist)
+        if s > limit or ret > 3:
+            return -1
+        else:
+            return float(np.mean(dist))
+        # for i in range(len(prl)):
+        #     d_x = []
+        #     d_y = []
+        #     for j in range(len(prl)):
+        #         if i != j:
+        #             d_x.append(DynamicProcess.dtw(prl[i][1], prl[j][1]))
+        #             d_y.append(DynamicProcess.dtw(prl[i][2], prl[j][2]))
+        #     ret.append(f(d_x, d_y))
+        # return np.mean(ret)
 
 
 def match(preprocessd_real_list, pre_length, compare_list, limit=0.6):
     x = DynamicProcess.compare(preprocessd_real_list, compare_list)
+    if limit <= 0:
+        limit = pre_length * 0.15 + 0.45
     res = x * limit
     # maybe should update the pre_value.
     if res < pre_length:
